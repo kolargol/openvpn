@@ -1,6 +1,7 @@
 # OpenVPN with ScrambleSuit and DNS
-This ansible script will allow you to install from scratch your own OpenVPN server with scramblesuit and private DNS server within minutes. Level of knowledge required: **basic**
-There is no bul**hit, no unessesery clunky software, it's based on OpenBSD, simple ansible playbook, easy as any kid can read. 
+This [ansible](http://docs.ansible.com/ansible/latest/intro_installation.html) script will allow you to install from scratch your own [OpenVPN](https://openvpn.net/index.php/open-source.html) server with [scramblesuit](https://www.cs.kau.se/philwint/scramblesuit/) and private [DNS](https://www.isc.org/downloads/bind/) server within minutes. Level of knowledge required: **basic**
+
+There is no bul**hit, no unessesery clunky software, it's based on [OpenBSD](http://www.openbsd.org), simple ansible playbook, easy as any kid can read. 
 Once playbook finish, you have ready to use 2 archives with configs and all what is needed to connect to your VPN: one config is for Desktop Viscosity app and second for iPhone OpenVPN app (_ovpn_). You can easly create more keypairs/config for more users and adapt to your needs. Really simple, see below for usage.
 
 ## Why ?
@@ -13,7 +14,13 @@ ToDo
 
 ## My choose of cloud provider, apps and why
 
-ToDo
+For this playbook i have choosen [exoscale](https://www.exoscale.ch) as cloud provider (*but it will run on any OpenBSD you choose*). 
+Why exoscale? Becouse it's Swiss, it's independent from US influences and obey only Swiss law, also they are nice and simply to use. Also their prices are quite low - or comparable to other's like DigitalOcean or AWS. Performance of the single CPU core is sufficent for OpenVPN in [Micro](https://portal.exoscale.ch/register?r=gLrEOdv5hVgv) instance do not use anything bigger then that as long as you do not use it for over 10 users.
+
+If you are going to use **exoscale** please use my **invite code** ( gLrEOdv5hVgv ), or [this link](https://portal.exoscale.ch/register?r=gLrEOdv5hVgv) - you will get **50 CHF** credit after *second* payment - that's ammount that will let you use VPN server for free for next 5 months !!
+
+
+For the client side, i recommend using [Viscosity VPN](https://www.sparklabs.com/viscosity/) - no freebies here ;) - is it easy to use OpenVPN client that works on Windows and MacOS. It is well developed and uses recent openvpn client software.
 
 ## How to use playbook
 
