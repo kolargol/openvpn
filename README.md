@@ -20,7 +20,9 @@ Why exoscale? Becouse it's Swiss, it's independent from US influences and obey o
 If you are going to use **exoscale** please use my **invite code** ( gLrEOdv5hVgv ), or [this link](https://portal.exoscale.ch/register?r=gLrEOdv5hVgv) - you will get **50 CHF** credit after *second* payment - that's ammount that will let you use VPN server for free for next 5 months !!
 
 
-For the client side, i recommend using [Viscosity VPN](https://www.sparklabs.com/viscosity/) - no freebies here ;) - is it easy to use OpenVPN client that works on Windows and MacOS. It is well developed and uses recent openvpn client software.
+For the desktop client side, i recommend using [Viscosity VPN](https://www.sparklabs.com/viscosity/) - no freebies here ;) - is it easy to use OpenVPN client that works on Windows and MacOS. It is well developed and uses recent openvpn client software.
+
+If you are using iPhone, config is generated for free app [OpenVPN Connect](https://itunes.apple.com/pl/app/openvpn-connect/id590379981?l=pl&mt=8) - only one legacy app. I assume there are some apps for Android as well but i do not have one so cannot recommend any...
 
 ## How to use playbook
 
@@ -28,7 +30,8 @@ Below simple requirements to run your own VPN server
 
 #### Requirements
 * have ansible installed on your computer
-* have running newly created OpenBSD instance in some Cloud Provider (here we use ExoScale as stated above)
+* have running newly created OpenBSD instance in some cloud provider (*here we use [exoscale](https://portal.exoscale.ch/register?r=gLrEOdv5hVgv) as stated above*)
+* allow SSH port 22 for install from your host, and permamently allow TCP 80 and 443 for VPN
 * basic knowledge of using terminal and ssh
 * pretty much that's all
 
