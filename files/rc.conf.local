@@ -1,0 +1,3 @@
+pkg_scripts=isc_named openvpn obfs
+smtpd_flags=NO
+sndiod_flags=NO

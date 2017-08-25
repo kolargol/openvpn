@@ -1,0 +1,221 @@
+---
+- hosts: privateVPN
+  gather_facts: False
+  vars:
+    ca_name: unused
+  tasks:
+    - name: Create installurl with repos
+      raw: echo "http://mirror.switch.ch/ftp/pub/OpenBSD" > /etc/installurl
+      tags:
+        - update_installurl
+        - basesystem_config
+    - name: Install python needed by ansible
+      raw: pkg_add python-2.7.13p0
+      tags:
+        - basesystem_config
+        - install_python
+    - name: Link python2.7 as default
+      raw: ln -s /usr/local/bin/python2.7 /usr/bin/python
+      ignore_errors: yes
+    - name: Update OpenBSD base system (can take lot of time)
+      shell: syspatch
+      register: bsd_updated
+      tags:
+        - update_bsd
+    - name: Remove unessesery software
+      openbsd_pkg: name=opensmtpd state=absent
+      tags:
+        - remove_packages
+    - name: Disable and Stop services
+      shell: rcctl disable {{ item }} ; rcctl stop {{ item }}
+      with_items:
+        - smtpd
+        - sndiod
+      tags:
+        - disable_services
+    - name: Rebooting machine after updates
+      shell: sleep 2 && shutdown -r now "Ansible updates triggered"
+      async: 1
+      poll: 0
+      ignore_errors: true
+      when: bsd_updated.changed
+    - name: Waiting for machine to get back (this make take some time...)
+      local_action: wait_for host={{ ansible_ssh_host }} port=22 state=started delay=30 timeout=60
+      become: false
+      when: bsd_updated.changed
+    - name: Install required packages
+      openbsd_pkg: name={{ item }} state=present
+      with_items:
+        - easy-rsa-3.0.1
+        - isc-bind-9.10.4pl6-geoip
+        - openvpn-2.4.1
+        - git-2.12.2
+        - py-pip
+        - bash
+        - apg-2.2.3p0
+        - libyaml-0.1.7
+      tags:
+        - install_packages
+        - basesystem_config
+    - name: Download obfsproxy
+      git: repo=https://git.torproject.org/pluggable-transports/obfsproxy.git force=yes
+        dest=/usr/src/obfsproxy
+        accept_hostkey=True
+      tags:
+        - install_obfs
+        - upgrade_obfs
+    - name: Install obfsproxy
+      shell: chdir=/usr/src/obfsproxy/ {{ item }}
+      with_items:
+        - pip2.7 install --upgrade  constantly
+        - python2.7 setup.py install
+      tags:
+        - install_obfs
+        - upgrade_obfs
+    - name: Create some dirs
+      file: path={{ item.dir }} owner={{ item.owner }} group={{ item.group }} state=directory
+      with_items:
+        - { dir: /etc/openvpn, owner: root, group: wheel }
+        - { dir: /etc/openvpn/export, owner: root, group: wheel }
+        - { dir: /etc/openvpn/jail, owner: root, group: wheel }
+        - { dir: /etc/openvpn/jail/ccd, owner: root, group: wheel }
+        - { dir: /etc/openvpn/jail/tmp, owner: root, group: wheel }
+        - { dir: /etc/openvpn/status, owner: root, group: wheel }
+        - { dir: /var/named/var/cache/bind, owner: root, group: _bind }
+        - { dir: /etc/openvpn/export/archives, owner: root, group: wheel }
+        - { dir: /etc/openvpn/export/privateVPN-Desktop.visc, owner: root, group: wheel }
+      tags:
+        - create_dirs
+        - basesystem_config
+    - name: Symlink bash (yes i like bash)
+      file: state=link src=/usr/local/bin/bash dest=/bin/bash force=yes
+    - name: Symlink easy-rsa
+      file: state=link src=/usr/local/share/easy-rsa dest=/etc/openvpn/easy-rsa force=yes
+    - name: Copy config files
+      copy: src=files/{{ item.src }} dest={{ item.dst}} owner={{ item.owner }} group={{ item.group }} mode={{ item.mode }} #mode="u+rwx,go-w"
+      with_items:
+        - { src: privateVPN-Desktop.conf, dst: /etc/openvpn/privateVPN-Desktop.conf, owner: root, group: wheel, mode: "u+rw,go-rw" }
+        - { src: privateVPN-Mobile.conf, dst: /etc/openvpn/privateVPN-Mobile.conf, owner: root, group: wheel, mode: "u+rw,go-rw" }
+        - { src: named.conf, dst: /var/named/etc/named.conf, owner: root, group: _bind, mode: "u+rw,go-rw" }
+        - { src: openvpn.init, dst: /etc/rc.d/openvpn, owner: root, group: wheel, mode: "ugo+x,go-w" }
+        - { src: obfs.init, dst: /etc/rc.d/obfs, owner: root, group: wheel, mode: "ugo+x,go-w" }
+        - { src: rc.conf.local, dst: /etc/rc.conf.local, owner: root, group: wheel, mode: "u+rw,go+r" }
+        - { src: pf.conf, dst: /etc/pf.conf, owner: root, group: wheel, mode: "u+rw,go-rwx" }
+        - { src: gen_config.sh, dst: /etc/openvpn/export, owner: root, group: wheel, mode: "u+rwx,go-rwx" }
+        - { src: privateVPN-Desktop.visc/config.conf, dst: /etc/openvpn/export/privateVPN-Desktop.visc/config.conf, owner: root, group: wheel, mode: "u+rwx,go-rwx" }
+        - { src: privateVPN-Mobile.ovpn.template, dst: /etc/openvpn/export/privateVPN-Mobile.ovpn.template, owner: root, group: wheel, mode: "u+rwx,go-rwx" }
+      tags:
+        - copy_configs
+        - basesystem_config
+    - name: Let's do some sed's on the template files
+      shell: "{{ item }}"
+      with_items:
+        - ifconfig vio0 | grep inet | awk '{ print $2}' | xargs -I xxx sed -i s/LISTEN_IP/xxx/g /etc/rc.d/obfs /etc/openvpn/privateVPN-Mobile.conf /etc/pf.conf /etc/openvpn/export/privateVPN-Desktop.visc/config.conf
+        - apg -a 1 -m 32 -MC -n1 | xargs -I xxx sed -i s/SCRAMBLE_SECRET/xxx/g /etc/rc.d/obfs /etc/openvpn/export/privateVPN-Desktop.visc/config.conf
+        - hostname | xargs -I xxx sed -i s/SERVER_CERT/PrivateVPN-xxx_ECC/g /etc/openvpn/privateVPN-Desktop.conf
+        - hostname | xargs -I xxx sed -i s/SERVER_CERT/PrivateVPN-xxx_RSA/g /etc/openvpn/privateVPN-Mobile.conf
+      tags:
+        - update_templates
+        - copy_configs
+    - name: Add OBFSproxy user
+      user: name=obfs home=/home/obfs shell=/bin/bash
+      tags:
+        - create_obfs_user
+    - name: Reload pf
+      command: pfctl -f /etc/pf.conf
+      tags:
+        - reload_pf
+    - name: Easy-RSA - Initialize and Generate PKI/CA/Server Certificate for ECC and RSA
+      shell: chdir=/etc/openvpn/easy-rsa/ {{ item }}
+      with_items:
+        - ./easyrsa init-pki
+        - ./easyrsa gen-dh
+        - apg -a 1 -m 6 -MCL -n1 | xargs -I xxx ./easyrsa --batch --req-cn="privateVPN CA (xxx)" --use-algo=ec --curve=secp521r1 build-ca nopass
+        - hostname | xargs -I xxx ./easyrsa --use-algo=ec --curve=secp521r1 build-server-full "PrivateVPN-xxx_ECC" nopass
+        - hostname | xargs -I xxx ./easyrsa --use-algo=rsa --ns-cert=yes  build-server-full "PrivateVPN-xxx_RSA" nopass
+      tags:
+        - create_pki
+    # We use ECC for Desktop connections and RSA for Mobile clients as ECC is not yet supported
+    # It is important to have always name "Mobile" or "Desktop" in Subject field
+    # By default I use secp521r1 which perhaps is overkill, feel free to change to some less intensive curve
+    - name: Create one sample set of Client certificates for Mobile(RSA) and Desktop(ECC)
+      shell: chdir=/etc/openvpn/easy-rsa/ {{ item }}
+      with_items:
+        - ./easyrsa --use-algo=rsa build-client-full privateVPN-Mobile-JohnDoe nopass
+        - ./easyrsa --use-algo=ec --curve=secp521r1 build-client-full privateVPN-Desktop-JohnDoe nopass
+      tags:
+        - gen_client_certs
+    - name: Create shared-secret for TLSauth(RSA) and TLScrypt(ECC)
+      shell: openvpn --genkey --secret /etc/openvpn/easy-rsa/pki/ta.key
+      tags:
+        - gen_ta
+    - name: Generate CRL
+      shell: cd /etc/openvpn/easy-rsa/; ./easyrsa gen-crl ; cp pki/crl.pem /etc/openvpn/jail/crl.pem
+      tags:
+        - update_crl
+    - name: Generate SHA256 from CA certificate
+      shell: openssl x509 -in /etc/openvpn/easy-rsa/pki/ca.crt -noout -sha256 -fingerprint|cut -d= -f2
+      register: ca_sha2
+      tags:
+        - get_ca_sha2
+        - update_ca_hash
+    - name: Generate SHA1 from CA certificate
+      shell: openssl x509 -in /etc/openvpn/easy-rsa/pki/ca.crt -noout -sha1 -fingerprint|cut -d= -f2
+      register: ca_sha1
+      tags:
+        - get_ca_sha1
+        - update_ca_hash
+    - name: Put SHA256 and SHA1 into client configurations
+      shell: "{{ item }}"
+      with_items:
+        - sed -i s/CA_HASH/{{ ca_sha2.stdout }}/g /etc/openvpn/export/privateVPN-Desktop.visc/config.conf
+        - sed -i s/CA_HASH/{{ ca_sha1.stdout }}/g /etc/openvpn/export/privateVPN-Mobile.ovpn.template
+      tags:
+        - update_ca_hash
+      # Yes, I can use file module here but i rather use shell for link unknown number of certs with pattern, feel free to fix it
+    - name: Link generated certificates, keys and stuff to export folder for client package generation
+      shell: chdir=/etc/openvpn/export/ {{ item }}
+      with_items:
+        - ln -s /etc/openvpn/easy-rsa/pki/issued/privateVPN* .
+        - ln -s /etc/openvpn/easy-rsa/pki/private/privateVPN* .
+        - ln -s /etc/openvpn/easy-rsa/pki/ca.crt .
+        - ln -s /etc/openvpn/easy-rsa/pki/ta.key .
+      ignore_errors: yes
+      tags:
+        - make_cert_links
+        - gen_package_vpn  
+    # I do not care for other entries in sysctl.conf as we do it for this playbook purpose, feel free to make it better ;)
+    - name: Enable forwarding and make it permement
+      shell: "{{ item }}"
+      with_items:
+        - echo "net.inet.ip.forwarding=1" > /etc/sysctl.conf
+        - sysctl net.inet.ip.forwarding=1
+      tags:
+        - enable_forwarding
+    - name: Use localhost as primary DNS server, and Google as secondary
+      shell: "{{ item }}"
+      with_items:
+        - echo "prepend domain-name-servers 127.0.0.1,8.8.8.8,8.8.4.4 ;" > /etc/dhclient.conf ;
+        - echo "nameserver 127.0.0.1" > /etc/resolv.conf
+        - pgrep dhclient | while read dhcpds ; do kill -HUP $dhcpds; done
+      tags:
+        - update_resolvconf
+    # ToDO: fix BSD init services to make it compatibile properly
+    - name: Enable services ans start them
+      shell: rcctl {{ item }}
+      with_items:
+        - enable obfs
+        - start obfs
+        - enable openvpn
+        - start openvpn
+        - enable isc_named
+        - start isc_named
+      tags:
+        - enable_services
+    - name: Pack Client Configs (one for iPhone OpenVPN and second for Viscosity Desktop VPN)
+      shell: chdir=/etc/openvpn/export/ {{ item }}
+      with_items:
+        - ./gen_config.sh privateVPN-Desktop-JohnDoe
+        - ./gen_config.sh privateVPN-Mobile-JohnDoe
+      tags:
+        - gen_package_vpn

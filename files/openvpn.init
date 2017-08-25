@@ -1,0 +1,72 @@
+#!/bin/bash
+
+start_openvpn(){
+  # SingleStart
+  if [ "$1" != "" ]; then
+    if [ ! -f /etc/openvpn/$1.conf ];then
+      echo "Config file: $1.conf do not exist"
+      exit 1
+    fi
+    echo -n "Starting OpenVPN for: $1 "
+    /usr/local/sbin/openvpn --daemon $1 --cd /etc/openvpn --config $1.conf
+    ret=$?
+    if [ "$?" != "0" ];then
+        echo "...failed"
+        exit 1
+      else
+        echo "...ok"
+    fi
+    exit
+  fi
+
+  # MultiStart
+  for config in /etc/openvpn/*.conf; do
+     daemon_name=$(echo $config | cut -d/ -f4 | cut -d\. -f1)
+     echo -n "Starting OpenVPN for: $daemon_name "
+     /usr/local/sbin/openvpn --daemon $daemon_name --cd /etc/openvpn --config $config
+     ret=$?
+     if [ "$?" != "0" ];then
+         echo "...failed"
+       else
+         echo "...ok"
+     fi
+     
+  done
+}
+
+stop_openvpn(){
+  if [ "$1" != "" ];then
+    pido=$(pgrep -fo "$1")
+    echo "Stopping OpenVPN: $1 (PID: $pido)"
+    kill -9 $pido
+    exit
+  fi
+  echo "Stopping OpenVPN"
+  pgrep openvpn | while read pid; do
+    echo "PID: $pid"
+    kill -9 $pid
+  done
+}
+
+restart_openvpn(){
+  echo "Restarting OpenVPN"
+  stop_openvpn $1
+  start_openvpn $1
+}
+
+status_openvpn(){
+  echo "Not implemented"
+}
+
+
+case "$1" in
+  start) start_openvpn $2
+  ;;
+  stop) stop_openvpn $2
+  ;;
+  restart) restart_openvpn
+  ;;
+  *)
+  echo "$0 [start|stop|restart]"
+  exit
+esac
