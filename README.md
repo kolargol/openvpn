@@ -10,7 +10,17 @@ This playbook guaranetee that your data on transit are safe, server _do not_ sto
 
 ## Security
 
-ToDo
+I am using Easy-RSA 3 to setup [PKI](https://en.wikipedia.org/wiki/Public_key_infrastructure), it's easy to manage (*see below*). [ECC](https://en.wikipedia.org/wiki/Elliptic_curve_cryptography) keypairs use *secp521r1* curve (*which is perhaps overkill, and you can safely lower it to more efficient secp256k1*), and RSA uses 2048 bit keys with SHA256 signatures. 
+
+Mobile connections uses **DHE-RSA-AES256-SHA** TLS1.2 for control channel and **AES-256-CBC** for data encryption, also **HMAC** is used for packets authentication.
+
+Desktop connections use **ECDHE-ECDSA-AES256-GCM-SHA384** TLS1.2 for control channel and **AES-256-GCM** for data encryption, in additions openvpn is configured to use **tls-crypt** with symetric key for packet encryption and authentication.
+
+Additionally Desktop connections are wrapped with scrabmlesuit tunnel (*part of Tor project*) and although some say that's not needed when useing *tls-crypt* some think otherwise ;) ... anyway, this is how it is done here.
+
+There are other settings that ensure connection is safe, like EKU, CA hash verification and others, see config for details. 
+
+Last thing on the list is **DNS** server that is setup with this playbook. It's **Bind9** with [DNSSEC](https://en.wikipedia.org/wiki/Domain_Name_System_Security_Extensions) resolver enabled. This ensures that your queries do not leak to other providers and you always use legacy (*your own*) DNS server. I *do not use* Google DNS or other crap caching servers like OpenDNS (*who btw strip DNS records from DNSSEC signatures - which simply speking can be seen as fraudulent itself...*). You can verify DNS leaks on site like: [https://www.dnsleaktest.com](https://www.dnsleaktest.com) and on [https://dnssec.vs.uni-due.de](https://dnssec.vs.uni-due.de) verify if DNSSEC resolver works as expected.
 
 ## My choose of cloud provider, apps and why
 
