@@ -54,9 +54,33 @@ get your configs, they are in
 * **/etc/openvpn/export/archives/privateVPN-Desktop-JohnDoe.tar.gz** - this is for Viscosity DesktopApp
 * **/etc/openvpn/export/archives/privateVPN-Mobile-JohnDoe.tar.gz** - this is for iPhone OpenVPN app
 
+you can use: *scp root@SERVER_IP:/etc/openvpn/export/archives/\* .* to copy config files all at once.
+
+Once all is done, you can import above configs into your Viscosity app or/and iPhone OpenVPN app - no changes required all is already set. 
+
+#### Generating additional certificates for users
+
+If more users are going to use OpenVPN then you need to generate new key-pairs (*each for each user*). This is simple to do and there are 2 ways of doing it:
+
+* create ansible play - this is more advanced and i will not cover it here
+* use **gen_config.sh**, steps below:
+
+on the server, go to: */etc/openvpn/easy-rsa/* and type:
+
+**./easyrsa --use-algo=rsa build-client-full privateVPN-Mobile-USERNAME nopass** - for *Mobile* client, note that part "privateVPN-Mobile-" shoule be unchanged in certificate name, just add proper USERNAME (*no spaces or crazy stuff here, just a-azA-Z*). *Mobile* is a keyword used later by script.
+
+**./easyrsa --use-algo=ec --curve=secp521r1 build-client-full privateVPN-Desktop-USERNAME nopass** - for *Desktop* client, note that part "privateVPN-Desktop-" should be unchanged in certificate name, just add proper USERNAME, same as above - no crazy characters. *Desktop* is a keyword, do not change it.
+
+**Note:** as you can see private keys are generated *without* password, you can password-protect them by removing **nopass** option. You will be asked for password and this is **recommended** way of generating keypair. I use nopass just for the convenience of the playbook. Also, for god sake **do not send keypairs via email or any other crazy way** without properly encrypting them, best - set password on key and wrap up by some gpg.
+
+Once you understood all, let's generate packages with config, easy like 1,2,3...: go to: */etc/openvpn/export/* and symlink all new keypairs into export folder: **ln -s /etc/openvpn/easy-rsa/pki/issued/privateVPN\* .** and **ln -s /etc/openvpn/easy-rsa/pki/private/privateVPN\* .** then for each user run: **./gen_config.sh privateVPN-Desktop-USERNAME** packages are put into *archives/* folder. Copy to localhosts, share, install, enjoy.
+
+That's all. 
+
+
 #### Client Configuration
 
-ToDo
+
 
 #### Customizations
 
