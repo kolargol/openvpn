@@ -153,6 +153,10 @@
       shell: cd /etc/openvpn/easy-rsa/; ./easyrsa gen-crl ; cp pki/crl.pem /etc/openvpn/jail/crl.pem
       tags:
         - update_crl
+    - name: Fix CRL permissions so jailed openvpn can read content
+      file: path=/etc/openvpn/jail/crl.pem mode=0644
+      tags:
+        - update_crl
     - name: Generate SHA256 from CA certificate
       shell: openssl x509 -in /etc/openvpn/easy-rsa/pki/ca.crt -noout -sha256 -fingerprint|cut -d= -f2
       register: ca_sha2
