@@ -80,6 +80,9 @@ That's all.
 
 #### Client Configuration
 
+Desktop config creates 172.17.200.0/24 network, access on port 80
+
+Mobile config creates 172.16.200.0/24 network, access on port 443
 
 
 #### Customizations
