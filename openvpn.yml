@@ -110,7 +110,12 @@
     - name: Let's do some sed's on the template files
       shell: "{{ item }}"
       with_items:
-        - ifconfig vio0 | grep inet | awk '{ print $2}' | xargs -I xxx sed -i s/LISTEN_IP/xxx/g /etc/rc.d/obfs /etc/openvpn/privateVPN-Mobile.conf /etc/pf.conf /etc/openvpn/export/privateVPN-Desktop.visc/config.conf
+        - ifconfig vio0 | grep inet | awk '{ print $2}' | xargs -I xxx sed -i s/LISTEN_IP/xxx/g 
+            /etc/rc.d/obfs
+            /etc/openvpn/privateVPN-Mobile.conf
+            /etc/pf.conf
+            /etc/openvpn/export/privateVPN-Desktop.visc/config.conf
+            /etc/openvpn/export/privateVPN-Mobile.ovpn.template
         - apg -a 1 -m 32 -MC -n1 | xargs -I xxx sed -i s/SCRAMBLE_SECRET/xxx/g /etc/rc.d/obfs /etc/openvpn/export/privateVPN-Desktop.visc/config.conf
         - hostname | xargs -I xxx sed -i s/SERVER_CERT/PrivateVPN-xxx_ECC/g /etc/openvpn/privateVPN-Desktop.conf
         - hostname | xargs -I xxx sed -i s/SERVER_CERT/PrivateVPN-xxx_RSA/g /etc/openvpn/privateVPN-Mobile.conf
