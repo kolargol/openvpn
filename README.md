@@ -26,7 +26,7 @@ Last thing on the list is **DNS** server that is setup with this playbook. It's 
 
 This playbook configures IPv6 as DualStack setup - this means, if server supports IPv6 then you will be able to use IPv6 on your localhost. Although I am using DualStack since long time, this one is not well tested on OpenBSD by me. If you find any problems please report them in Issues section.
 
-Exoscale will support IPv6 at the end of 2017, but you can use IPv6 and this playbook also on: [Vultr](https://www.vultr.com) (tested), [Azure](https://azure.microsoft.com/en-us/) or any other cloud where OpenBSD 6.1 is.
+Exoscale will support IPv6 at the end of 2017, but you can use IPv6 and this playbook also on: [Vultr](https://www.vultr.com) (tested), [Azure](https://azure.microsoft.com/en-us/), [AWS](https://aws.amazon.com) or any other cloud where OpenBSD 6.1 is.
 
 ## My choose of cloud provider, apps and why
 
@@ -45,8 +45,8 @@ If you are using iPhone, config is generated for free app [OpenVPN Connect](http
 Below simple requirements to run your own VPN server
 
 #### Requirements
-* have ansible installed on your computer
-* have running OpenBSD 6.1 instance in some cloud provider (*here we use [exoscale](https://portal.exoscale.ch/register?r=gLrEOdv5hVgv) as stated above*)
+* have [ansible installed](http://docs.ansible.com/ansible/latest/intro_installation.html) on your computer
+* have running **OpenBSD 6.1** instance in some cloud provider (*here we use [exoscale](https://portal.exoscale.ch/register?r=gLrEOdv5hVgv) as stated above*)
 * allow SSH port 22 for install from your host, and permanently allow TCP 80 and 443 for VPN
 * basic knowledge of using terminal and ssh
 * pretty much that's all
