@@ -110,7 +110,7 @@
     - name: Let's do some sed's on the template files
       shell: "{{ item }}"
       with_items:
-        - ifconfig vio0 | grep inet | awk '{ print $2}' | xargs -I xxx sed -i s/LISTEN_IP/xxx/g 
+        - ifconfig vio0 | grep inet | grep -v inet6 | awk '{ print $2}' | xargs -I xxx sed -i s/LISTEN_IP/xxx/g 
             /etc/rc.d/obfs
             /etc/openvpn/privateVPN-Mobile.conf
             /etc/pf.conf
@@ -126,6 +126,17 @@
       user: name=obfs home=/home/obfs shell=/bin/bash
       tags:
         - create_obfs_user
+      # Have better idea? Create pull request...
+    - name: Detect if IPv6 is up on vio0
+      shell: ifconfig vio0|sed -n '/inet6/p'|wc -l|sed -e 's/^[ \t]*//'
+      register: ipv6is
+      tags:
+        - reload_pf
+    - name: If IPv6 is present add additional rules to pf
+      shell: echo "pass out on vio0 from fdd5:b0c4:f9fb:fa1f::/64 to any nat-to vio0\npass out on vio0 from fdd5:b0c4:f9fb:fa1e::/64 to any nat-to vio0" >> /etc/pf.conf
+      when: ipv6is.stdout != "0"
+      tags:
+        - reload_pf
     - name: Reload pf
       command: pfctl -f /etc/pf.conf
       tags:
@@ -198,7 +209,9 @@
       shell: "{{ item }}"
       with_items:
         - echo "net.inet.ip.forwarding=1" > /etc/sysctl.conf
+        - echo "net.inet6.ip6.forwarding=1" >> /etc/sysctl.conf
         - sysctl net.inet.ip.forwarding=1
+        - sysctl net.inet6.ip6.forwarding=1
       tags:
         - enable_forwarding
     - name: Use localhost as primary DNS server, and Google as secondary

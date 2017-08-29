@@ -22,6 +22,10 @@ There are other settings that ensure connection is safe, like EKU, CA hash verif
 
 Last thing on the list is **DNS** server that is setup with this playbook. It's **Bind9** with [DNSSEC](https://en.wikipedia.org/wiki/Domain_Name_System_Security_Extensions) resolver enabled. This ensures that your queries do not leak to other providers and you always use legacy (*your own*) DNS server. I *do not use* Google DNS or other crap caching servers like OpenDNS (*who btw strip DNS records from DNSSEC signatures - which simply speaking can be seen as fraudulent itself...*). You can verify DNS leaks on site like: [https://www.dnsleaktest.com](https://www.dnsleaktest.com) and on [https://dnssec.vs.uni-due.de](https://dnssec.vs.uni-due.de) verify if DNSSEC resolver works as expected.
 
+## IPv6 Support (DualStack)
+
+This playbook configures IPv6 as DualStack setup - this means, if server supports IPv6 then you will be able to use IPv6 on your localhost. Although I am using DualStack since long time, this one is not well tested on OpenBSD by me. If you find any problems please report them in Issues section.
+
 ## My choose of cloud provider, apps and why
 
 For this playbook I have chosen [exoscale](https://www.exoscale.ch) as cloud provider (*but it will run on any OpenBSD you choose*). 
@@ -80,9 +84,9 @@ That's all.
 
 #### Client Configuration
 
-Desktop config creates 172.17.200.0/24 network, access on port 80
+Desktop config creates IPv4: 172.17.200.0/24 and IPv6: fdd5:b0c4:f9fb:fa1f::/6 network, access on port 80
 
-Mobile config creates 172.16.200.0/24 network, access on port 443
+Mobile config creates IPv4: 172.16.200.0/24 and IPv6: fdd5:b0c4:f9fb:fa1e::/6 network, access on port 443
 
 
 #### Customizations
