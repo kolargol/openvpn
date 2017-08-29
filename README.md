@@ -26,7 +26,7 @@ Last thing on the list is **DNS** server that is setup with this playbook. It's 
 
 This playbook configures IPv6 as DualStack setup - this means, if server supports IPv6 then you will be able to use IPv6 on your localhost. Although I am using DualStack since long time, this one is not well tested on OpenBSD by me. If you find any problems please report them in Issues section.
 
-Exoscale will support IPv6 at the end of 2017, but you can use IPv6 and this playbook also on: [Vultr](https://www.vultr.com) (tested), [Azure](https://azure.microsoft.com/en-us/), [AWS](https://aws.amazon.com) or any other cloud where OpenBSD 6.1 is.
+Exoscale will support IPv6 at the end of 2017, but you can use IPv6 and this playbook also on: [Vultr](https://www.vultr.com) (*tested*), [Azure](https://azure.microsoft.com/en-us/), [AWS](https://aws.amazon.com) or any other cloud where OpenBSD 6.1 is.
 
 ## My choose of cloud provider, apps and why
 
