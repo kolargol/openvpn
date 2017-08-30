@@ -16,7 +16,7 @@ Mobile connections uses **DHE-RSA-AES256-SHA** TLS1.2 for control channel and **
 
 Desktop connections use **ECDHE-ECDSA-AES256-GCM-SHA384** TLS1.2 for control channel and **AES-256-GCM** for data encryption, in additions openvpn is configured to use **tls-crypt** with symmetric key for packet encryption and authentication.
 
-Additionally Desktop connections are wrapped with scrabmlesuit tunnel (*part of Tor project*) and although some say that's not needed when useing *tls-crypt* some think otherwise ;) ... anyway, this is how it is done here.
+Additionally *desktop* connections are wrapped with [scramblesuit](https://www.cs.kau.se/philwint/scramblesuit/) tunnel (*part of [Tor project](https://www.torproject.org)*) and although some say that's not needed when useing *tls-crypt* some think otherwise ;) ... anyway, this is how it is done here.
 
 There are other settings that ensure connection is safe, like EKU, CA hash verification and others, see config for details. 
 
@@ -24,7 +24,9 @@ Last thing on the list is **DNS** server that is setup with this playbook. It's 
 
 ## IPv6 Support (DualStack)
 
-This playbook configures IPv6 as DualStack setup - this means, if server supports IPv6 then you will be able to use IPv6 on your localhost. Although I am using DualStack since long time, this one is not well tested on OpenBSD by me. If you find any problems please report them in Issues section.
+This playbook configures IPv6 as [Dual-Stack](https://en.wikipedia.org/wiki/IPv6#Transition_mechanisms) setup - this means, if server supports IPv6 then you will be able to use IPv6 on your localhost. Although I am using DualStack since long time, this one is not well tested on OpenBSD by me. If you find any problems please report them in [Issues](https://github.com/kolargol/openvpn/issues) section.
+
+Exoscale will support IPv6 at the end of 2017, but you can use IPv6 and this playbook also on: [Vultr](https://www.vultr.com) (*tested*), [Azure](https://azure.microsoft.com/en-us/), [AWS](https://aws.amazon.com) or any other cloud where OpenBSD 6.1 is.
 
 ## My choose of cloud provider, apps and why
 
@@ -38,18 +40,32 @@ For the desktop client side, i recommend using [Viscosity VPN](https://www.spark
 
 If you are using iPhone, config is generated for free app [OpenVPN Connect](https://itunes.apple.com/pl/app/openvpn-connect/id590379981?l=pl&mt=8) - only one legacy app. I assume there are some apps for Android as well but i do not have one so cannot recommend any...
 
+## Some cloud providers known to support OpenBSD
+
+Here is list of cloud providers with support for OpenBSD:
+
+* [Exoscale](https://portal.exoscale.ch/register?r=gLrEOdv5hVgv) (*tested*)
+* [Vultr](https://www.vultr.com) (*tested*)
+* [AWS](https://aws.amazon.com)(*tested - do not work out-of-the-box, as non-standard config is used*)
+* [Azure](https://azure.microsoft.com/en-us/) (*not tested*)
+* [Tilaa](https://www.tilaa.com/en/vps-software) (*not tested*)
+* [TransIP](https://www.transip.eu/vps/openbsd/) (*not tested*)
+* [Ramnode](https://clientarea.ramnode.com/knowledgebase.php?action=displayarticle&id=48) (*not tested*)
+* [Bytemark](https://www.bytemark.co.uk/cloud-hosting/) (*not tested*)
+
+
 ## How to use playbook
 
 Below simple requirements to run your own VPN server
 
-#### Requirements
-* have ansible installed on your computer
-* have running newly created OpenBSD instance in some cloud provider (*here we use [exoscale](https://portal.exoscale.ch/register?r=gLrEOdv5hVgv) as stated above*)
+### Requirements
+* have [ansible installed](http://docs.ansible.com/ansible/latest/intro_installation.html) on your computer
+* have running **OpenBSD 6.1** instance in some cloud provider (*here we use [exoscale](https://portal.exoscale.ch/register?r=gLrEOdv5hVgv) as stated above*)
 * allow SSH port 22 for install from your host, and permanently allow TCP 80 and 443 for VPN
 * basic knowledge of using terminal and ssh
 * pretty much that's all
 
-#### Steps to start your own OpenVPN server from ansible playbook:
+### Steps to start your own OpenVPN server from ansible playbook:
 * edit *private_vpn_inventory* and replace **IP_OF_YOUR_SERVER** with IP of your cloud server (easy?)
 * run ansible with command: **ansible-playbook -i private_vpn_inventory openvpn.yml**
 * after ansible finish without error your server is ready to use
@@ -62,7 +78,7 @@ you can use: *scp root@SERVER_IP:/etc/openvpn/export/archives/\* .* to copy conf
 
 Once all is done, you can import above configs into your Viscosity app or/and iPhone OpenVPN app - no changes required all is already set. 
 
-#### Generating additional certificates for users
+### Generating additional certificates for users
 
 If more users are going to use OpenVPN then you need to generate new key-pairs (*each for each user*). This is simple to do and there are 2 ways of doing it:
 
@@ -82,14 +98,14 @@ Once you understood all, let's generate packages with config, easy like 1,2,3...
 That's all. 
 
 
-#### Client Configuration
+### Client Configuration
 
 Desktop config creates IPv4: 172.17.200.0/24 and IPv6: fdd5:b0c4:f9fb:fa1f::/6 network, access on port 80
 
 Mobile config creates IPv4: 172.16.200.0/24 and IPv6: fdd5:b0c4:f9fb:fa1e::/6 network, access on port 443
 
 
-#### Customizations
+### Customizations
 
 ToDo
 
