@@ -16,7 +16,7 @@ Mobile connections uses **DHE-RSA-AES256-SHA** TLS1.2 for control channel and **
 
 Desktop connections use **ECDHE-ECDSA-AES256-GCM-SHA384** TLS1.2 for control channel and **AES-256-GCM** for data encryption, in additions openvpn is configured to use **tls-crypt** with symmetric key for packet encryption and authentication.
 
-Additionally Desktop connections are wrapped with scrabmlesuit tunnel (*part of Tor project*) and although some say that's not needed when useing *tls-crypt* some think otherwise ;) ... anyway, this is how it is done here.
+Additionally *desktop* connections are wrapped with [scramblesuit](https://www.cs.kau.se/philwint/scramblesuit/) tunnel (*part of [Tor project](https://www.torproject.org)*) and although some say that's not needed when useing *tls-crypt* some think otherwise ;) ... anyway, this is how it is done here.
 
 There are other settings that ensure connection is safe, like EKU, CA hash verification and others, see config for details. 
 
@@ -24,7 +24,7 @@ Last thing on the list is **DNS** server that is setup with this playbook. It's 
 
 ## IPv6 Support (DualStack)
 
-This playbook configures IPv6 as DualStack setup - this means, if server supports IPv6 then you will be able to use IPv6 on your localhost. Although I am using DualStack since long time, this one is not well tested on OpenBSD by me. If you find any problems please report them in Issues section.
+This playbook configures IPv6 as [Dual-Stack](https://en.wikipedia.org/wiki/IPv6#Transition_mechanisms) setup - this means, if server supports IPv6 then you will be able to use IPv6 on your localhost. Although I am using DualStack since long time, this one is not well tested on OpenBSD by me. If you find any problems please report them in [Issues](https://github.com/kolargol/openvpn/issues) section.
 
 Exoscale will support IPv6 at the end of 2017, but you can use IPv6 and this playbook also on: [Vultr](https://www.vultr.com) (*tested*), [Azure](https://azure.microsoft.com/en-us/), [AWS](https://aws.amazon.com) or any other cloud where OpenBSD 6.1 is.
 
