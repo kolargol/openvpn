@@ -132,8 +132,17 @@
       register: ipv6is
       tags:
         - reload_pf
-    - name: If IPv6 is present add additional rules to pf
-      shell: echo "pass out on vio0 from fdd5:b0c4:f9fb:fa1f::/64 to any nat-to vio0\npass out on vio0 from fdd5:b0c4:f9fb:fa1e::/64 to any nat-to vio0" >> /etc/pf.conf
+    - name: Get IPv6 address
+      shell: ifconfig vio0|grep inet6|egrep -v -e "inet6 fe80:" -e autoconfprivacy|awk '{ print $2}'
+      register: ipv6addr
+      when: ipv6is.stdout != "0"
+      tags:
+        - reload_pf
+    - name: If IPv6 is present add additional rules to pf and place IPv6 address
+      shell: "{{ item }}"
+      with_items:
+        - echo "pass out on vio0 from fdd5:b0c4:f9fb:fa1f::/64 to any nat-to \$ext_ip_6\npass out on vio0 from fdd5:b0c4:f9fb:fa1e::/64 to any nat-to \$ext_ip_6" >> /etc/pf.conf
+        - sed -i s/LISTEN_IPv6/{{ ipv6addr.stdout }}/g /etc/pf.conf
       when: ipv6is.stdout != "0"
       tags:
         - reload_pf
