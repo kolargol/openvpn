@@ -58,14 +58,14 @@ Here is list of cloud providers with support for OpenBSD:
 
 Below simple requirements to run your own VPN server
 
-#### Requirements
+### Requirements
 * have [ansible installed](http://docs.ansible.com/ansible/latest/intro_installation.html) on your computer
 * have running **OpenBSD 6.1** instance in some cloud provider (*here we use [exoscale](https://portal.exoscale.ch/register?r=gLrEOdv5hVgv) as stated above*)
 * allow SSH port 22 for install from your host, and permanently allow TCP 80 and 443 for VPN
 * basic knowledge of using terminal and ssh
 * pretty much that's all
 
-#### Steps to start your own OpenVPN server from ansible playbook:
+### Steps to start your own OpenVPN server from ansible playbook:
 * edit *private_vpn_inventory* and replace **IP_OF_YOUR_SERVER** with IP of your cloud server (easy?)
 * run ansible with command: **ansible-playbook -i private_vpn_inventory openvpn.yml**
 * after ansible finish without error your server is ready to use
@@ -78,7 +78,7 @@ you can use: *scp root@SERVER_IP:/etc/openvpn/export/archives/\* .* to copy conf
 
 Once all is done, you can import above configs into your Viscosity app or/and iPhone OpenVPN app - no changes required all is already set. 
 
-#### Generating additional certificates for users
+### Generating additional certificates for users
 
 If more users are going to use OpenVPN then you need to generate new key-pairs (*each for each user*). This is simple to do and there are 2 ways of doing it:
 
@@ -98,14 +98,14 @@ Once you understood all, let's generate packages with config, easy like 1,2,3...
 That's all. 
 
 
-#### Client Configuration
+### Client Configuration
 
 Desktop config creates IPv4: 172.17.200.0/24 and IPv6: fdd5:b0c4:f9fb:fa1f::/6 network, access on port 80
 
 Mobile config creates IPv4: 172.16.200.0/24 and IPv6: fdd5:b0c4:f9fb:fa1e::/6 network, access on port 443
 
 
-#### Customizations
+### Customizations
 
 ToDo
 
