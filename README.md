@@ -40,6 +40,20 @@ For the desktop client side, i recommend using [Viscosity VPN](https://www.spark
 
 If you are using iPhone, config is generated for free app [OpenVPN Connect](https://itunes.apple.com/pl/app/openvpn-connect/id590379981?l=pl&mt=8) - only one legacy app. I assume there are some apps for Android as well but i do not have one so cannot recommend any...
 
+## Some cloud providers known to support OpenBSD
+
+Here is list of cloud providers with support for OpenBSD:
+
+* [Exoscale](https://portal.exoscale.ch/register?r=gLrEOdv5hVgv) (*tested*)
+* [Vultr](https://www.vultr.com) (*tested*)
+* [AWS](https://aws.amazon.com)(*tested - do not work out-of-the-box, as non-standard config is used*)
+* [Azure](https://azure.microsoft.com/en-us/) (*not tested*)
+* [Tilaa](https://www.tilaa.com/en/vps-software) (*not tested*)
+* [TransIP](https://www.transip.eu/vps/openbsd/) (*not tested*)
+* [Ramnode](https://clientarea.ramnode.com/knowledgebase.php?action=displayarticle&id=48) (*not tested*)
+* [Bytemark](https://www.bytemark.co.uk/cloud-hosting/) (*not tested*)
+
+
 ## How to use playbook
 
 Below simple requirements to run your own VPN server
