@@ -107,7 +107,7 @@ Mobile config creates IPv4: 172.16.200.0/24 and IPv6: fdd5:b0c4:f9fb:fa1e::/6 ne
 ### Known issues and workarounds
 
 #### DNS stop working after when OpenVPN process is restarted
-This happens becouse DNS server process lose bind after openvpn is stopped. To fix this, after restarting OpenVPN process, restart bind with command **rcctl restart isc_named**
+This happens because DNS server process lose bind after openvpn is stopped. To fix this, after restarting OpenVPN process, restart bind with command **rcctl restart isc_named**
 
 ### Customizations
 
