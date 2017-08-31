@@ -6,7 +6,7 @@ key ID_NAME.key
 tls-auth ta.key 1
 comp-lzo
 port 80
-proto tcp
+proto udp
 auth SHA256
 cipher AES-256-CBC
 tls-cipher TLS-DHE-RSA-WITH-AES-256-GCM-SHA384:TLS-DHE-RSA-WITH-AES-256-CBC-SHA256:TLS-DHE-RSA-WITH-AES-256-CBC-SHA

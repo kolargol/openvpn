@@ -50,29 +50,11 @@
         - easy-rsa-3.0.1
         - isc-bind-9.10.4pl6-geoip
         - openvpn-2.4.1
-        - git-2.12.2
-        - py-pip
         - bash
         - apg-2.2.3p0
-        - libyaml-0.1.7
       tags:
         - install_packages
         - basesystem_config
-    - name: Download obfsproxy
-      git: repo=https://git.torproject.org/pluggable-transports/obfsproxy.git force=yes
-        dest=/usr/src/obfsproxy
-        accept_hostkey=True
-      tags:
-        - install_obfs
-        - upgrade_obfs
-    - name: Install obfsproxy
-      shell: chdir=/usr/src/obfsproxy/ {{ item }}
-      with_items:
-        - pip2.7 install --upgrade  constantly
-        - python2.7 setup.py install
-      tags:
-        - install_obfs
-        - upgrade_obfs
     - name: Create some dirs
       file: path={{ item.dir }} owner={{ item.owner }} group={{ item.group }} state=directory
       with_items:
@@ -99,7 +81,6 @@
         - { src: privateVPN-Mobile.conf, dst: /etc/openvpn/privateVPN-Mobile.conf, owner: root, group: wheel, mode: "u+rw,go-rw" }
         - { src: named.conf, dst: /var/named/etc/named.conf, owner: root, group: _bind, mode: "u+rw,go-rw" }
         - { src: openvpn.init, dst: /etc/rc.d/openvpn, owner: root, group: wheel, mode: "ugo+x,go-w" }
-        - { src: obfs.init, dst: /etc/rc.d/obfs, owner: root, group: wheel, mode: "ugo+x,go-w" }
         - { src: rc.conf.local, dst: /etc/rc.conf.local, owner: root, group: wheel, mode: "u+rw,go+r" }
         - { src: pf.conf, dst: /etc/pf.conf, owner: root, group: wheel, mode: "u+rw,go-rwx" }
         - { src: gen_config.sh, dst: /etc/openvpn/export, owner: root, group: wheel, mode: "u+rwx,go-rwx" }
@@ -112,21 +93,16 @@
       shell: "{{ item }}"
       with_items:
         - ifconfig vio0 | grep inet | grep -v inet6 | awk '{ print $2}' | xargs -I xxx sed -i 's/[[:<:]]LISTEN_IP[[:>:]]/xxx/g'
-            /etc/rc.d/obfs
             /etc/openvpn/privateVPN-Mobile.conf
+            /etc/openvpn/privateVPN-Desktop.conf
             /etc/pf.conf
             /etc/openvpn/export/privateVPN-Desktop.visc/config.conf
             /etc/openvpn/export/privateVPN-Mobile.ovpn.template
-        - apg -a 1 -m 32 -MC -n1 | xargs -I xxx sed -i s/SCRAMBLE_SECRET/xxx/g /etc/rc.d/obfs /etc/openvpn/export/privateVPN-Desktop.visc/config.conf
         - hostname | xargs -I xxx sed -i s/SERVER_CERT/PrivateVPN-xxx_ECC/g /etc/openvpn/privateVPN-Desktop.conf
         - hostname | xargs -I xxx sed -i s/SERVER_CERT/PrivateVPN-xxx_RSA/g /etc/openvpn/privateVPN-Mobile.conf
       tags:
         - update_templates
         - copy_configs
-    - name: Add OBFSproxy user
-      user: name=obfs home=/home/obfs shell=/bin/bash
-      tags:
-        - create_obfs_user
       # Have better idea? Create pull request...
     - name: Detect if IPv6 is up on vio0
       shell: ifconfig vio0|sed -n '/inet6/p'|wc -l|sed -e 's/^[ \t]*//'
@@ -236,8 +212,6 @@
     - name: Enable services ans start them
       shell: rcctl {{ item }}
       with_items:
-        - enable obfs
-        - start obfs
         - enable openvpn
         - start openvpn
         - enable isc_named

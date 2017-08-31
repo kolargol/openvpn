@@ -1,5 +1,7 @@
-# OpenVPN with Scramblesuit and DNS server
-This [ansible](http://docs.ansible.com/ansible/latest/intro_installation.html) script will allow you to install from scratch your own [OpenVPN](https://openvpn.net/index.php/open-source.html) server with [scramblesuit](https://www.cs.kau.se/philwint/scramblesuit/) and private [DNS](https://www.isc.org/downloads/bind/) server within minutes. Level of knowledge required: **basic**
+# OpenVPN with DNS server 
+####(*this is **UDP** branch, if you are looking for Scramblesuit version checkout  [master](https://github.com/kolargol/openvpn/tree/master)*)
+
+This [ansible](http://docs.ansible.com/ansible/latest/intro_installation.html) script will allow you to install from scratch your own [OpenVPN](https://openvpn.net/index.php/open-source.html) server with [DNS](https://www.isc.org/downloads/bind/) server within minutes. Level of knowledge required: **basic**
 
 There is no bul**hit, no unnecessary clunky software, it's based on [OpenBSD](http://www.openbsd.org), simple ansible playbook, easy as any kid can read. 
 Once playbook finish, you have ready to use 2 archives with configs and all what is needed to connect to your VPN: one config is for Desktop Viscosity app and second for iPhone OpenVPN app (_ovpn_). You can easily create more keypairs/config for more users and adapt to your needs. Really simple, see below for usage.
@@ -15,8 +17,6 @@ I am using Easy-RSA 3 to setup [PKI](https://en.wikipedia.org/wiki/Public_key_in
 Mobile connections uses **DHE-RSA-AES256-SHA** TLS1.2 for control channel and **AES-256-CBC** for data encryption, also **HMAC** is used for packets authentication.
 
 Desktop connections use **ECDHE-ECDSA-AES256-GCM-SHA384** TLS1.2 for control channel and **AES-256-GCM** for data encryption, in additions openvpn is configured to use **tls-crypt** with symmetric key for packet encryption and authentication.
-
-Additionally *desktop* connections are wrapped with [scramblesuit](https://www.cs.kau.se/philwint/scramblesuit/) tunnel (*part of [Tor project](https://www.torproject.org)*) and although some say that's not needed when useing *tls-crypt* some think otherwise ;) ... anyway, this is how it is done here.
 
 There are other settings that ensure connection is safe, like EKU, CA hash verification and others, see config for details. 
 
@@ -61,7 +61,7 @@ Below simple requirements to run your own VPN server
 ### Requirements
 * have [ansible installed](http://docs.ansible.com/ansible/latest/intro_installation.html) on your computer
 * have running **OpenBSD 6.1** instance in some cloud provider (*here we use [exoscale](https://portal.exoscale.ch/register?r=gLrEOdv5hVgv) as stated above*)
-* allow SSH port 22 for install from your host, and permanently allow TCP 80 and 443 for VPN
+* allow SSH port 22 for install from your host, and permanently allow ports: **UDP** 80 and 443 for VPN
 * basic knowledge of using terminal and ssh
 * pretty much that's all
 
