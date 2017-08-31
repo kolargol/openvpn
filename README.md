@@ -4,6 +4,9 @@ This [ansible](http://docs.ansible.com/ansible/latest/intro_installation.html) s
 There is no bul**hit, no unnecessary clunky software, it's based on [OpenBSD](http://www.openbsd.org), simple ansible playbook, easy as any kid can read. 
 Once playbook finish, you have ready to use 2 archives with configs and all what is needed to connect to your VPN: one config is for Desktop Viscosity app and second for iPhone OpenVPN app (_ovpn_). You can easily create more keypairs/config for more users and adapt to your needs. Really simple, see below for usage.
 
+## UDP branch
+**If you do not care about paranoid privacy mode and internet speed is important to you, please check [udp-noscrable](https://github.com/kolargol/openvpn/tree/udp-noscramble) branch. UDP branch uses same security measures as master branch but remove scramblesuit and use much faster UDP mode**
+
 ## Why ?
 Because other solutions are crap. So called "_private_" VPNs that are sold are no private - you let **unknown party** to watch _all_ your traffic, they sell it to Ad companies or do what they want with _your_ data. It's really stupid and people are unaware of this.
 This playbook guarantee that your data on transit are safe, server _do not_ store anything related with traffic or DNS queries, even in unlikely breach to your VPN server attacker won't be able to do anything that could harm your data (_of course once you realize server was pwned_). Read below why using VPN on your mobile and desktop is important.
