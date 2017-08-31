@@ -3,6 +3,7 @@
   gather_facts: False
   vars:
     ca_name: unused
+    crypto_curve: unused
   tasks:
     - name: Create installurl with repos
       raw: echo "http://mirror.switch.ch/ftp/pub/OpenBSD" > /etc/installurl
