@@ -1,5 +1,5 @@
 # OpenVPN with DNS server 
-####(*this is **UDP** branch, if you are looking for Scramblesuit version checkout  [master](https://github.com/kolargol/openvpn/tree/master)*)
+#### (*this is **UDP** branch, if you are looking for Scramblesuit version checkout  [master](https://github.com/kolargol/openvpn/tree/master)*)
 
 This [ansible](http://docs.ansible.com/ansible/latest/intro_installation.html) script will allow you to install from scratch your own [OpenVPN](https://openvpn.net/index.php/open-source.html) server with [DNS](https://www.isc.org/downloads/bind/) server within minutes. Level of knowledge required: **basic**
 
