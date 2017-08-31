@@ -110,7 +110,7 @@
     - name: Let's do some sed's on the template files
       shell: "{{ item }}"
       with_items:
-        - ifconfig vio0 | grep inet | grep -v inet6 | awk '{ print $2}' | xargs -I xxx sed -i s/LISTEN_IP/xxx/g 
+        - ifconfig vio0 | grep inet | grep -v inet6 | awk '{ print $2}' | xargs -I xxx sed -i 's/[[:<:]]LISTEN_IP[[:>:]]/xxx/g'
             /etc/rc.d/obfs
             /etc/openvpn/privateVPN-Mobile.conf
             /etc/pf.conf
