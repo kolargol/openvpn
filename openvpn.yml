@@ -3,6 +3,7 @@
   gather_facts: False
   vars:
     ca_name: unused
+    crypto_curve: secp521r1
   tasks:
     - name: Create installurl with repos
       raw: echo "http://mirror.switch.ch/ftp/pub/OpenBSD" > /etc/installurl
@@ -155,8 +156,8 @@
       with_items:
         - ./easyrsa init-pki
         - ./easyrsa gen-dh
-        - apg -a 1 -m 6 -MCL -n1 | xargs -I xxx ./easyrsa --batch --req-cn="privateVPN CA (xxx)" --use-algo=ec --curve=secp521r1 build-ca nopass
-        - hostname | xargs -I xxx ./easyrsa --use-algo=ec --curve=secp521r1 build-server-full "PrivateVPN-xxx_ECC" nopass
+        - apg -a 1 -m 6 -MCL -n1 | xargs -I xxx ./easyrsa --batch --req-cn="privateVPN CA (xxx)" --use-algo=ec --curve={{ crypto_curve }} build-ca nopass
+        - hostname | xargs -I xxx ./easyrsa --use-algo=ec --curve={{ crypto_curve }} build-server-full "PrivateVPN-xxx_ECC" nopass
         - hostname | xargs -I xxx ./easyrsa --use-algo=rsa --ns-cert=yes  build-server-full "PrivateVPN-xxx_RSA" nopass
       tags:
         - create_pki
@@ -167,7 +168,7 @@
       shell: chdir=/etc/openvpn/easy-rsa/ {{ item }}
       with_items:
         - ./easyrsa --use-algo=rsa build-client-full privateVPN-Mobile-JohnDoe nopass
-        - ./easyrsa --use-algo=ec --curve=secp521r1 build-client-full privateVPN-Desktop-JohnDoe nopass
+        - ./easyrsa --use-algo=ec --curve={{ crypto_curve }} build-client-full privateVPN-Desktop-JohnDoe nopass
       tags:
         - gen_client_certs
     - name: Create shared-secret for TLSauth(RSA) and TLScrypt(ECC)
