@@ -82,7 +82,7 @@
         - { dir: /etc/openvpn/jail/ccd, owner: root, group: wheel }
         - { dir: /etc/openvpn/jail/tmp, owner: root, group: wheel }
         - { dir: /etc/openvpn/status, owner: root, group: wheel }
-        - { dir: /var/named/var/cache/bind, owner: root, group: _bind }
+        - { dir: /var/named/var/cache/bind, owner: _bind, group: _bind }
         - { dir: /etc/openvpn/export/archives, owner: root, group: wheel }
         - { dir: /etc/openvpn/export/privateVPN-Desktop.visc, owner: root, group: wheel }
       tags:
