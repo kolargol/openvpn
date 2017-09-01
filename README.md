@@ -97,6 +97,7 @@ on the server, go to: */etc/openvpn/easy-rsa/* and type:
 **Note:** as you can see private keys are generated *without* password, you can password-protect them by removing **nopass** option. You will be asked for password and this is **recommended** way of generating keypair. I use nopass just for the convenience of the playbook. Also, for god sake **do not send keypairs via email or any other crazy way** without properly encrypting them, best - set password on key and wrap up by some gpg.
 
 Once you understood all, let's generate packages with config, easy like 1,2,3...: go to: */etc/openvpn/export/* and for each user run: **./gen_config.sh privateVPN-Desktop-USERNAME** packages are put into *archives/* folder. Copy to localhosts, share, install, enjoy.
+
 You can also use this crazy loop to create packages for all issued certificates:
 ```
 ls -all /etc/openvpn/easy-rsa/pki/issued/privateVPN-* | cut -d/ -f 7 | cut -d. -f1 | while read cert; do ./gen_config.sh $cert; done
