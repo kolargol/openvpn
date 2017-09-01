@@ -1,5 +1,5 @@
 # OpenVPN with DNS server 
-#### (*this is **UDP** branch, if you are looking for Scramblesuit version checkout  [master](https://github.com/kolargol/openvpn/tree/master)*)
+#### (*this is **UDP** branch - oriented on high performance, if you are looking for Scramblesuit version checkout  [master](https://github.com/kolargol/openvpn/tree/master)*)
 
 This [ansible](http://docs.ansible.com/ansible/latest/intro_installation.html) script will allow you to install from scratch your own [OpenVPN](https://openvpn.net/index.php/open-source.html) server with [DNS](https://www.isc.org/downloads/bind/) server within minutes. Level of knowledge required: **basic**
 
@@ -12,7 +12,7 @@ This playbook guarantee that your data on transit are safe, server _do not_ stor
 
 ## Security
 
-I am using Easy-RSA 3 to setup [PKI](https://en.wikipedia.org/wiki/Public_key_infrastructure), it's easy to manage (*see below*). [ECC](https://en.wikipedia.org/wiki/Elliptic_curve_cryptography) keypairs use *secp521r1* curve (*which is perhaps overkill, and you can safely lower it to more efficient secp256k1*), and RSA uses 2048 bit keys with SHA256 signatures. 
+I am using Easy-RSA 3 to setup [PKI](https://en.wikipedia.org/wiki/Public_key_infrastructure), it's easy to manage (*see below*). [ECC](https://en.wikipedia.org/wiki/Elliptic_curve_cryptography) keypairs use *prime256v1* curve, and RSA uses 2048 bit keys with SHA256 signatures. 
 
 Mobile connections uses **DHE-RSA-AES256-SHA** TLS1.2 for control channel and **AES-256-CBC** for data encryption, also **HMAC** is used for packets authentication.
 
@@ -89,7 +89,7 @@ on the server, go to: */etc/openvpn/easy-rsa/* and type:
 
 **./easyrsa --use-algo=rsa build-client-full privateVPN-Mobile-USERNAME nopass** - for *Mobile* client, note that part "privateVPN-Mobile-" should be unchanged in certificate name, just add proper USERNAME (*no spaces or crazy stuff here, just a-azA-Z*). *Mobile* is a keyword used later by script.
 
-**./easyrsa --use-algo=ec --curve=secp521r1 build-client-full privateVPN-Desktop-USERNAME nopass** - for *Desktop* client, note that part "privateVPN-Desktop-" should be unchanged in certificate name, just add proper USERNAME, same as above - no crazy characters. *Desktop* is a keyword, do not change it.
+**./easyrsa --use-algo=ec --curve=prime256v1 build-client-full privateVPN-Desktop-USERNAME nopass** - for *Desktop* client, note that part "privateVPN-Desktop-" should be unchanged in certificate name, just add proper USERNAME, same as above - no crazy characters. *Desktop* is a keyword, do not change it.
 
 **Note:** as you can see private keys are generated *without* password, you can password-protect them by removing **nopass** option. You will be asked for password and this is **recommended** way of generating keypair. I use nopass just for the convenience of the playbook. Also, for god sake **do not send keypairs via email or any other crazy way** without properly encrypting them, best - set password on key and wrap up by some gpg.
 
