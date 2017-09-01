@@ -177,18 +177,6 @@
         - sed -i s/CA_HASH/{{ ca_sha1.stdout }}/g /etc/openvpn/export/privateVPN-Mobile.ovpn.template
       tags:
         - update_ca_hash
-      # Yes, I can use file module here but i rather use shell for link unknown number of certs with pattern, feel free to fix it
-    - name: Link generated certificates, keys and stuff to export folder for client package generation
-      shell: chdir=/etc/openvpn/export/ {{ item }}
-      with_items:
-        - ln -s /etc/openvpn/easy-rsa/pki/issued/privateVPN* .
-        - ln -s /etc/openvpn/easy-rsa/pki/private/privateVPN* .
-        - ln -s /etc/openvpn/easy-rsa/pki/ca.crt .
-        - ln -s /etc/openvpn/easy-rsa/pki/ta.key .
-      ignore_errors: yes
-      tags:
-        - make_cert_links
-        - gen_package_vpn  
     # I do not care for other entries in sysctl.conf as we do it for this playbook purpose, feel free to make it better ;)
     - name: Enable forwarding and make it permement
       shell: "{{ item }}"
