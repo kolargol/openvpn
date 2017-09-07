@@ -129,7 +129,7 @@
         - create_obfs_user
       # Have better idea? Create pull request...
     - name: Detect if IPv6 is up on vio0
-      shell: ifconfig vio0|sed -n '/inet6/p'|wc -l|sed -e 's/^[ \t]*//'
+      shell: ifconfig vio0|sed -n '/inet6/p'|grep -v "inet6 fe80:"|wc -l|sed -e 's/^[ \t]*//'
       register: ipv6is
       tags:
         - reload_pf
