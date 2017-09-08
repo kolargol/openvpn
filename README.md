@@ -66,6 +66,7 @@ Below simple requirements to run your own VPN server
 * pretty much that's all
 
 ### Steps to start your own OpenVPN server from ansible playbook:
+* Download release from: https://github.com/kolargol/openvpn/tags (*you can also clone but releases are always tested and signed with [my gpg key](http://pgp.mit.edu/pks/lookup?op=vindex&search=0xE83413E79DB62E31), it is recommended way obtaining playbook*)
 * edit *private_vpn_inventory* and replace **IP_OF_YOUR_SERVER** with IP of your cloud server (easy?)
 * run ansible with command: **ansible-playbook -i private_vpn_inventory openvpn.yml**
 * after ansible finish without error your server is ready to use
