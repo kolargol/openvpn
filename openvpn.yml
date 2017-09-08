@@ -41,9 +41,12 @@
       ignore_errors: true
       when: bsd_updated.changed
     - name: Waiting for machine to get back (this make take some time...)
-      local_action: wait_for host={{ ansible_ssh_host }} port=22 state=started delay=30 timeout=60
+      local_action: wait_for host={{ ansible_ssh_host }} port=22 state=started delay=120 timeout=120
       become: false
       when: bsd_updated.changed
+    - name: Detect interface name
+      shell: basename /etc/hostname.*|cut -d. -f2
+      register: ifname
     - name: Install required packages
       openbsd_pkg: name={{ item }} state=present
       with_items:
@@ -101,17 +104,20 @@
         - { src: openvpn.init, dst: /etc/rc.d/openvpn, owner: root, group: wheel, mode: "ugo+x,go-w" }
         - { src: obfs.init, dst: /etc/rc.d/obfs, owner: root, group: wheel, mode: "ugo+x,go-w" }
         - { src: rc.conf.local, dst: /etc/rc.conf.local, owner: root, group: wheel, mode: "u+rw,go+r" }
-        - { src: pf.conf, dst: /etc/pf.conf, owner: root, group: wheel, mode: "u+rw,go-rwx" }
         - { src: gen_config.sh, dst: /etc/openvpn/export, owner: root, group: wheel, mode: "u+rwx,go-rwx" }
         - { src: privateVPN-Desktop.visc/config.conf, dst: /etc/openvpn/export/privateVPN-Desktop.visc/config.conf, owner: root, group: wheel, mode: "u+rwx,go-rwx" }
         - { src: privateVPN-Mobile.ovpn.template, dst: /etc/openvpn/export/privateVPN-Mobile.ovpn.template, owner: root, group: wheel, mode: "u+rwx,go-rwx" }
       tags:
         - copy_configs
         - basesystem_config
+    - name: Generate pf config file
+      template: src=files/pf.j2 dest=/etc/pf.conf owner=root group=wheel
+      tags:
+        - copy_configs
     - name: Let's do some sed's on the template files
       shell: "{{ item }}"
       with_items:
-        - ifconfig vio0 | grep inet | grep -v inet6 | awk '{ print $2}' | xargs -I xxx sed -i 's/[[:<:]]LISTEN_IP[[:>:]]/xxx/g'
+        - ifconfig {{ ifname.stdout }} | grep inet | grep -v inet6 | awk '{ print $2}' | xargs -I xxx sed -i 's/[[:<:]]LISTEN_IP[[:>:]]/xxx/g'
             /etc/rc.d/obfs
             /etc/openvpn/privateVPN-Mobile.conf
             /etc/pf.conf
@@ -128,13 +134,13 @@
       tags:
         - create_obfs_user
       # Have better idea? Create pull request...
-    - name: Detect if IPv6 is up on vio0
-      shell: ifconfig vio0|sed -n '/inet6/p'|grep -v "inet6 fe80:"|wc -l|sed -e 's/^[ \t]*//'
+    - name: Detect if IPv6 is up on {{ ifname.stdout }}
+      shell: ifconfig {{ ifname.stdout }}|sed -n '/inet6/p'|grep -v "inet6 fe80:"|wc -l|sed -e 's/^[ \t]*//'
       register: ipv6is
       tags:
         - reload_pf
     - name: Get IPv6 address
-      shell: ifconfig vio0|grep inet6|egrep -v -e "inet6 fe80:" -e autoconfprivacy|awk '{ print $2}'
+      shell: ifconfig {{ ifname.stdout }}|grep inet6|egrep -v -e "inet6 fe80:" -e autoconfprivacy|awk '{ print $2}'
       register: ipv6addr
       when: ipv6is.stdout != "0"
       tags:
@@ -142,7 +148,7 @@
     - name: If IPv6 is present add additional rules to pf and place IPv6 address
       shell: "{{ item }}"
       with_items:
-        - echo "pass out on vio0 from fdd5:b0c4:f9fb:fa1f::/64 to any nat-to \$ext_ip_6\npass out on vio0 from fdd5:b0c4:f9fb:fa1e::/64 to any nat-to \$ext_ip_6" >> /etc/pf.conf
+        - echo "pass out on {{ ifname.stdout }} from fdd5:b0c4:f9fb:fa1f::/64 to any nat-to \$ext_ip_6\npass out on {{ ifname.stdout }} from fdd5:b0c4:f9fb:fa1e::/64 to any nat-to \$ext_ip_6" >> /etc/pf.conf
         - sed -i s/LISTEN_IPv6/{{ ipv6addr.stdout }}/g /etc/pf.conf
       when: ipv6is.stdout != "0"
       tags:

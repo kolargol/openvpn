@@ -16,5 +16,5 @@ block in quick from urpf-failed
 pass in on egress proto tcp from any to any port 443 rdr-to $ext_ip_4 port 8443
 
 # NAT from OpenVPN net
-pass out on vio0 from 172.17.200.0/24 to any nat-to $ext_ip_4
-pass out on vio0 from 172.16.200.0/24 to any nat-to $ext_ip_4
+pass out on {{ ifname.stdout }} from 172.17.200.0/24 to any nat-to $ext_ip_4
+pass out on {{ ifname.stdout }} from 172.16.200.0/24 to any nat-to $ext_ip_4
