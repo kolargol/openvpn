@@ -46,7 +46,7 @@ Here is list of cloud providers with support for OpenBSD:
 
 * [Exoscale](https://portal.exoscale.ch/register?r=gLrEOdv5hVgv) (*tested*)
 * [Vultr](https://www.vultr.com/?ref=7207673) (*tested*)
-* [AWS](https://aws.amazon.com)(*tested - do not work out-of-the-box, as non-standard config is used*)
+* [AWS](https://aws.amazon.com)(*tested with EU AMI: **ami-bc78bfc5** made from [my recipe](https://github.com/kolargol/openbsd-aws)*)
 * [Azure](https://azure.microsoft.com/en-us/) (*not tested*)
 * [Tilaa](https://www.tilaa.com/en/vps-software) (*not tested*)
 * [TransIP](https://www.transip.eu/vps/openbsd/) (*not tested*)
@@ -113,6 +113,9 @@ Mobile config creates IPv4: 172.16.200.0/24 and IPv6: fdd5:b0c4:f9fb:fa1e::/6 ne
 
 #### DNS stop working after when OpenVPN process is restarted
 This happens because DNS server process lose bind after openvpn is stopped. To fix this, after restarting OpenVPN process, restart bind with command **rcctl restart isc_named**
+
+#### Ansible fails after waiting for instance restart
+Sometimes instance take longer then 2 minutes to restart after applying erratas. Just reply ansible command/playbook or if problem persist alter timeout in playbok in restart task
 
 ### Customizations
 
