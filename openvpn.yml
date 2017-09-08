@@ -34,6 +34,34 @@
         - sndiod
       tags:
         - disable_services
+    - name: Detect interface name
+      shell: basename /etc/hostname.*|cut -d. -f2
+      register: ifname
+      tags:
+        - install_packages
+        - detect_iface
+        - is_aws
+      # Assume, possibly wrong... that xnf0 is AWS specyfic as xnf0 is xen ifname,
+    - name: Install dhcpcd only on AWS (xnf0) instance
+      openbsd_pkg: name=dhcpcd state=present
+      when: ifname.stdout == "xnf0"
+      tags:
+        - install_packages
+        - detect_iface
+    - name: Use dhcpcd only for IPv6
+      shell: echo -e "ipv6only\nnohook resolv.conf" >> /etc/dhcpcd.conf
+      when: ifname.stdout == "xnf0"
+      tags:
+        - install_packages
+        - basesystem_config
+        - detect_iface
+    - name: Enable dhcpcd
+      shell: rcctl enable dhcpcd
+      when: ifname.stdout == "xnf0"
+      tags:
+        - install_packages
+        - basesystem_config
+        - detect_iface
     - name: Rebooting machine after updates
       shell: sleep 2 && shutdown -r now "Ansible updates triggered"
       async: 1
@@ -44,9 +72,6 @@
       local_action: wait_for host={{ ansible_ssh_host }} port=22 state=started delay=120 timeout=120
       become: false
       when: bsd_updated.changed
-    - name: Detect interface name
-      shell: basename /etc/hostname.*|cut -d. -f2
-      register: ifname
     - name: Install required packages
       openbsd_pkg: name={{ item }} state=present
       with_items:
@@ -114,6 +139,22 @@
       template: src=files/pf.j2 dest=/etc/pf.conf owner=root group=wheel
       tags:
         - copy_configs
+    - name: Update listening IP - Others
+      shell: ifconfig {{ ifname.stdout }}|grep inet|grep -v inet6|awk '{ print $2}'|xargs -I xxx sed -i 's/[[:<:]]LISTEN_IP[[:>:]]/xxx/g'
+               /etc/openvpn/export/privateVPN-Desktop.visc/config.conf
+               /etc/openvpn/export/privateVPN-Mobile.ovpn.template
+      when: ifname.stdout == "vio0"
+      tags:
+        - update_templates
+        - copy_configs
+    - name: Update listening IP - AWS
+      shell: ftp -MVo - http://169.254.169.254/latest/meta-data/public-ipv4|xargs -I xxx sed -i 's/[[:<:]]LISTEN_IP[[:>:]]/xxx/g'
+               /etc/openvpn/export/privateVPN-Desktop.visc/config.conf
+               /etc/openvpn/export/privateVPN-Mobile.ovpn.template
+      when: ifname.stdout == "xnf0"
+      tags:
+        - update_templates
+        - copy_configs
     - name: Let's do some sed's on the template files
       shell: "{{ item }}"
       with_items:
@@ -121,8 +162,6 @@
             /etc/rc.d/obfs
             /etc/openvpn/privateVPN-Mobile.conf
             /etc/pf.conf
-            /etc/openvpn/export/privateVPN-Desktop.visc/config.conf
-            /etc/openvpn/export/privateVPN-Mobile.ovpn.template
         - apg -a 1 -m 32 -MC -n1 | xargs -I xxx sed -i s/SCRAMBLE_SECRET/xxx/g /etc/rc.d/obfs /etc/openvpn/export/privateVPN-Desktop.visc/config.conf
         - hostname | xargs -I xxx sed -i s/SERVER_CERT/PrivateVPN-xxx_ECC/g /etc/openvpn/privateVPN-Desktop.conf
         - hostname | xargs -I xxx sed -i s/SERVER_CERT/PrivateVPN-xxx_RSA/g /etc/openvpn/privateVPN-Mobile.conf
