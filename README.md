@@ -46,7 +46,8 @@ Here is list of cloud providers with support for OpenBSD:
 
 * [Exoscale](https://portal.exoscale.ch/register?r=gLrEOdv5hVgv) (*tested*)
 * [Vultr](https://www.vultr.com/?ref=7207673) (*tested*)
-* [AWS](https://aws.amazon.com)(*tested with EU AMI: **ami-bc78bfc5** made from [my recipe](https://github.com/kolargol/openbsd-aws)*)
+* [AWS](https://aws.amazon.com)
+   (*works with eu-west-1 **ami-bc78bfc5** and us-east-1 ***ami-5845a022*** : made from [my recipe](https://github.com/kolargol/openbsd-aws)*)
 * [Azure](https://azure.microsoft.com/en-us/) (*not tested*)
 * [Tilaa](https://www.tilaa.com/en/vps-software) (*not tested*)
 * [TransIP](https://www.transip.eu/vps/openbsd/) (*not tested*)
