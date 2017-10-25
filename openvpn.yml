@@ -83,6 +83,15 @@
       tags:
         - install_packages
         - basesystem_config
+    - name: Get openup
+      shell: ftp -MVo /usr/bin/openup https://stable.mtier.org/openup;chmod +x /usr/bin/openup
+      tags:
+        - update_openup
+        - install_openup
+    - name: Update packages using openup
+      shell: /usr/bin/openup -N
+      tags:
+        - update_packages
     - name: Create some dirs
       file: path={{ item.dir }} owner={{ item.owner }} group={{ item.group }} state=directory
       with_items:
