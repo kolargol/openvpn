@@ -75,11 +75,11 @@
     - name: Install required packages
       openbsd_pkg: name={{ item }} state=present
       with_items:
-        - easy-rsa-3.0.1
-        - isc-bind-9.10.4pl6-geoip
-        - openvpn-2.4.1
+        - easy-rsa
+        - isc-bind-9.10.4pl6
+        - openvpn
         - bash
-        - apg-2.2.3p0
+        - apg
       tags:
         - install_packages
         - basesystem_config
