@@ -3,7 +3,7 @@
 
 This [ansible](http://docs.ansible.com/ansible/latest/intro_installation.html) script will allow you to install from scratch your own [OpenVPN](https://openvpn.net/index.php/open-source.html) server with [DNS](https://www.isc.org/downloads/bind/) server within minutes. Level of knowledge required: **basic**
 
-There is no bul**hit, no unnecessary clunky software, it's based on [OpenBSD](http://www.openbsd.org), simple ansible playbook, easy as any kid can read. 
+There is no bul**hit, no unnecessary clunky software, it's based on [OpenBSD 6.1](http://www.openbsd.org), simple ansible playbook, easy as any kid can read. 
 Once playbook finish, you have ready to use 2 archives with configs and all what is needed to connect to your VPN: one config is for Desktop Viscosity app and second for iPhone OpenVPN app (_ovpn_). You can easily create more keypairs/config for more users and adapt to your needs. Really simple, see below for usage.
 
 ## Why ?
