@@ -181,6 +181,7 @@
       command: pfctl -f /etc/pf.conf
       tags:
         - reload_pf
+    # Since OpenVPN Connect do not support ECDSA yet, we need to split openvpn server into RSA and ECC
     - name: Easy-RSA - Initialize and Generate PKI/CA/Server Certificate for ECC and RSA
       shell: chdir=/etc/openvpn/easy-rsa/ {{ item }}
       with_items:
@@ -191,12 +192,11 @@
         - hostname | xargs -I xxx ./easyrsa --use-algo=rsa --ns-cert=yes  build-server-full "PrivateVPN-xxx_RSA" nopass
       tags:
         - create_pki
-    # We use ECC for Desktop connections and RSA for Mobile clients as ECC is not yet supported
-    # It is important to have always name "Mobile" or "Desktop" in Subject field
-    - name: Create one sample set of Client certificates for Mobile(RSA) and Desktop(ECC)
+    # It is important to have always name "Mobile" or "Desktop" in Subject field. We CAN use EC keys for mobile however
+    - name: Create one sample set of Client certificates for Mobile and Desktop
       shell: chdir=/etc/openvpn/easy-rsa/ {{ item }}
       with_items:
-        - ./easyrsa --use-algo=rsa build-client-full privateVPN-Mobile-JohnDoe nopass
+        - ./easyrsa --use-algo=ec --curve={{ crypto_curve }} build-client-full privateVPN-Mobile-JohnDoe nopass
         - ./easyrsa --use-algo=ec --curve={{ crypto_curve }} build-client-full privateVPN-Desktop-JohnDoe nopass
       tags:
         - gen_client_certs

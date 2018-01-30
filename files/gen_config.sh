@@ -30,7 +30,7 @@ echo "Generating config for $id_name (Mobile)..."
 mkdir -p "$id_name"
 sed s/ID_NAME/$id_name/g privateVPN-Mobile.ovpn.template > $id_name/privateVPN-Mobile.ovpn
 cp /etc/openvpn/easy-rsa/pki/issued/$id_name.crt $id_name/
-openssl rsa -in /etc/openvpn/easy-rsa/pki/private/$id_name.key > $id_name/$id_name.key
+openssl ec -in /etc/openvpn/easy-rsa/pki/private/$id_name.key > $id_name/$id_name.key
 cp /etc/openvpn/easy-rsa/pki/ta.key $id_name/
 cp /etc/openvpn/easy-rsa/pki/ca.crt $id_name/
 tar -zcvf archives/$id_name.tar.gz $id_name
