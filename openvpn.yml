@@ -11,7 +11,7 @@
         - update_installurl
         - basesystem_config
     - name: Install python needed by ansible
-      raw: pkg_add python-2.7.13p0
+      raw: pkg_add python-2.7.14
       tags:
         - basesystem_config
         - install_python
