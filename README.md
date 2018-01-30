@@ -1,9 +1,9 @@
 # OpenVPN with DNS server 
 #### (*this is **UDP** branch - oriented on high performance, if you are looking for Scramblesuit version checkout  [master](https://github.com/kolargol/openvpn/tree/master)*)
 
-This [ansible](http://docs.ansible.com/ansible/latest/intro_installation.html) script will allow you to install from scratch your own [OpenVPN](https://openvpn.net/index.php/open-source.html) server with [DNS](https://www.isc.org/downloads/bind/) server within minutes. Level of knowledge required: **basic**
+This [ansible](http://docs.ansible.com/ansible/latest/intro_installation.html) script will allow you to install from scratch your own [OpenVPN](https://openvpn.net/index.php/open-source.html) server with [DNS](https://www.unbound.net) server within minutes. Level of knowledge required: **basic**
 
-There is no bul**hit, no unnecessary clunky software, it's based on [OpenBSD 6.1](http://www.openbsd.org), simple ansible playbook, easy as any kid can read. 
+There is no bul**hit, no unnecessary clunky software, it's based on [OpenBSD 6.2](http://www.openbsd.org), simple ansible playbook, easy as any kid can read. 
 Once playbook finish, you have ready to use 2 archives with configs and all what is needed to connect to your VPN: one config is for Desktop Viscosity app and second for iPhone OpenVPN app (_ovpn_). You can easily create more keypairs/config for more users and adapt to your needs. Really simple, see below for usage.
 
 ## Why ?
@@ -14,19 +14,21 @@ This playbook guarantee that your data on transit are safe, server _do not_ stor
 
 I am using Easy-RSA 3 to setup [PKI](https://en.wikipedia.org/wiki/Public_key_infrastructure), it's easy to manage (*see below*). [ECC](https://en.wikipedia.org/wiki/Elliptic_curve_cryptography) keypairs use *prime256v1* curve, and RSA uses 2048 bit keys with SHA256 signatures. 
 
-Mobile connections uses **DHE-RSA-AES256-SHA** TLS1.2 for control channel and **AES-256-CBC** for data encryption, also **HMAC** is used for packets authentication.
+Mobile connections uses **ECDHE-RSA-AES256-GCM-SHA384** TLS1.2 for control channel and **AES-256-GCM** for data encryption, also **HMAC** is used for packets authentication.
 
 Desktop connections use **ECDHE-ECDSA-AES256-GCM-SHA384** TLS1.2 for control channel and **AES-256-GCM** for data encryption, in additions openvpn is configured to use **tls-crypt** with symmetric key for packet encryption and authentication.
 
+For both control channels 256 bit EC (*curve prime256v1*) is used by default.
+
 There are other settings that ensure connection is safe, like EKU, CA hash verification and others, see config for details. 
 
-Last thing on the list is **DNS** server that is setup with this playbook. It's **Bind9** with [DNSSEC](https://en.wikipedia.org/wiki/Domain_Name_System_Security_Extensions) resolver enabled. This ensures that your queries do not leak to other providers and you always use legacy (*your own*) DNS server. I *do not use* Google DNS or other crap caching servers like OpenDNS (*who btw strip DNS records from DNSSEC signatures - which simply speaking can be seen as fraudulent itself...*). You can verify DNS leaks on site like: [https://www.dnsleaktest.com](https://www.dnsleaktest.com) and on [https://dnssec.vs.uni-due.de](https://dnssec.vs.uni-due.de) verify if DNSSEC resolver works as expected.
+Last thing on the list is **DNS** server that is setup with this playbook. It's **Unbound** with [DNSSEC](https://en.wikipedia.org/wiki/Domain_Name_System_Security_Extensions) resolver enabled. This ensures that your queries do not leak to other providers and you always use legacy (*your own*) DNS server. I *do not use* Google DNS or other crap caching servers like OpenDNS (*who btw strip DNS records from DNSSEC signatures - which simply speaking can be seen as fraudulent itself...*). You can verify DNS leaks on site like: [https://www.dnsleaktest.com](https://www.dnsleaktest.com) and on [https://dnssec.vs.uni-due.de](https://dnssec.vs.uni-due.de) verify if DNSSEC resolver works as expected.
 
 ## IPv6 Support (DualStack)
 
 This playbook configures IPv6 as [Dual-Stack](https://en.wikipedia.org/wiki/IPv6#Transition_mechanisms) setup - this means, if server supports IPv6 then you will be able to use IPv6 on your localhost. Although I am using DualStack since long time, this one is not well tested on OpenBSD by me. If you find any problems please report them in [Issues](https://github.com/kolargol/openvpn/issues) section.
 
-Exoscale will support IPv6 at the end of 2017, but you can use IPv6 and this playbook also on: [Vultr](https://www.vultr.com/?ref=7207673) (*tested*), [Azure](https://azure.microsoft.com/en-us/), [AWS](https://aws.amazon.com) or any other cloud where OpenBSD 6.1 is.
+Exoscale will support IPv6 at the beginning of 2018, but you can use IPv6 and this playbook also on: [Vultr](https://www.vultr.com/?ref=7207673) (*tested*), [Azure](https://azure.microsoft.com/en-us/), [AWS](https://aws.amazon.com) or any other cloud where OpenBSD 6.2 is.
 
 ## My choose of cloud provider, apps and why
 
@@ -40,14 +42,14 @@ For the desktop client side, i recommend using [Viscosity VPN](https://www.spark
 
 If you are using iPhone, config is generated for free app [OpenVPN Connect](https://itunes.apple.com/pl/app/openvpn-connect/id590379981?l=pl&mt=8) - only one legacy app. I assume there are some apps for Android as well but i do not have one so cannot recommend any...
 
-## Some cloud providers known to support OpenBSD
+## Some cloud providers known to support OpenBSD 6.2
 
 Here is list of cloud providers with support for OpenBSD:
 
 * [Exoscale](https://portal.exoscale.ch/register?r=gLrEOdv5hVgv) (*tested*)
 * [Vultr](https://www.vultr.com/?ref=7207673) (*tested*)
 * [AWS](https://aws.amazon.com)
-   (*works with eu-west-1 **ami-bc78bfc5** and us-east-1 ***ami-5845a022*** : made from [my recipe](https://github.com/kolargol/openbsd-aws)*)
+   (*works with eu-west-1 **ami-0f4ce976** and us-east-1 ***ami-382b1142*** : made from [my recipe](https://github.com/kolargol/openbsd-aws)*)
 * [Azure](https://azure.microsoft.com/en-us/) (*not tested*)
 * [Tilaa](https://www.tilaa.com/en/vps-software) (*not tested*)
 * [TransIP](https://www.transip.eu/vps/openbsd/) (*not tested*)
@@ -61,7 +63,7 @@ Below simple requirements to run your own VPN server
 
 ### Requirements
 * have [ansible installed](http://docs.ansible.com/ansible/latest/intro_installation.html) on your computer
-* have running **OpenBSD 6.1** instance in some cloud provider (*here we use [exoscale](https://portal.exoscale.ch/register?r=gLrEOdv5hVgv) as stated above*)
+* have running **OpenBSD 6.2** instance in some cloud provider (*here we use [exoscale](https://portal.exoscale.ch/register?r=gLrEOdv5hVgv) as stated above*)
 * allow SSH port 22 for install from your host, and permanently allow ports: **UDP** 80 and 443 for VPN
 * basic knowledge of using terminal and ssh
 * pretty much that's all
@@ -89,7 +91,7 @@ If more users are going to use OpenVPN then you need to generate new key-pairs (
 
 on the server, go to: */etc/openvpn/easy-rsa/* and type:
 
-**./easyrsa --use-algo=rsa build-client-full privateVPN-Mobile-USERNAME nopass** - for *Mobile* client, note that part "privateVPN-Mobile-" should be unchanged in certificate name, just add proper USERNAME (*no spaces or crazy stuff here, just a-azA-Z*). *Mobile* is a keyword used later by script.
+**./easyrsa --use-algo=ec --curve=prime256v1 build-client-full privateVPN-Mobile-USERNAME nopass** - for *Mobile* client, note that part "privateVPN-Mobile-" should be unchanged in certificate name, just add proper USERNAME (*no spaces or crazy stuff here, just a-azA-Z*). *Mobile* is a keyword used later by script.
 
 **./easyrsa --use-algo=ec --curve=prime256v1 build-client-full privateVPN-Desktop-USERNAME nopass** - for *Desktop* client, note that part "privateVPN-Desktop-" should be unchanged in certificate name, just add proper USERNAME, same as above - no crazy characters. *Desktop* is a keyword, do not change it.
 
@@ -114,10 +116,13 @@ Mobile config creates IPv4: 172.16.200.0/24 and IPv6: fdd5:b0c4:f9fb:fa1e::/6 ne
 ### Known issues and workarounds
 
 #### DNS stop working after when OpenVPN process is restarted
-This happens because DNS server process lose bind after openvpn is stopped. To fix this, after restarting OpenVPN process, restart bind with command **rcctl restart isc_named**
+This happens (*sometimes*) because DNS server process lose bind after openvpn is stopped. To fix this, after restarting OpenVPN process, restart bind with command **rcctl restart unbound**
 
 #### Ansible fails after waiting for instance restart
 Sometimes instance take longer then 2 minutes to restart after applying erratas. Just reply ansible command/playbook or if problem persist alter timeout in playbok in restart task
+
+#### iCloud sync stop working
+Disable 'Back to my mac' on Airport and iCloud settings on macOS
 
 ### Customizations
 
