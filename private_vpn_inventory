@@ -1,2 +1,2 @@
 [VPN]
-privateVPN ansible_ssh_host=159.100.246.108 ansible_ssh_user=root
+privateVPN ansible_ssh_host=IP_OF_YOUR_SERVER ansible_ssh_user=root
