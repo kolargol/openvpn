@@ -76,7 +76,6 @@
       openbsd_pkg: name={{ item }} state=present
       with_items:
         - easy-rsa
-        - isc-bind-9.10.4pl6
         - openvpn
         - bash
         - apg
@@ -101,7 +100,6 @@
         - { dir: /etc/openvpn/jail/ccd, owner: root, group: wheel }
         - { dir: /etc/openvpn/jail/tmp, owner: root, group: wheel }
         - { dir: /etc/openvpn/status, owner: root, group: wheel }
-        - { dir: /var/named/var/cache/bind, owner: _bind, group: _bind }
         - { dir: /etc/openvpn/export/archives, owner: root, group: wheel }
         - { dir: /etc/openvpn/export/privateVPN-Desktop.visc, owner: root, group: wheel }
       tags:
@@ -116,12 +114,12 @@
       with_items:
         - { src: privateVPN-Desktop.conf, dst: /etc/openvpn/privateVPN-Desktop.conf, owner: root, group: wheel, mode: "u+rw,go-rw" }
         - { src: privateVPN-Mobile.conf, dst: /etc/openvpn/privateVPN-Mobile.conf, owner: root, group: wheel, mode: "u+rw,go-rw" }
-        - { src: named.conf, dst: /var/named/etc/named.conf, owner: root, group: _bind, mode: "u+rw,go-rw" }
         - { src: openvpn.init, dst: /etc/rc.d/openvpn, owner: root, group: wheel, mode: "ugo+x,go-w" }
         - { src: rc.conf.local, dst: /etc/rc.conf.local, owner: root, group: wheel, mode: "u+rw,go+r" }
         - { src: gen_config.sh, dst: /etc/openvpn/export, owner: root, group: wheel, mode: "u+rwx,go-rwx" }
         - { src: privateVPN-Desktop.visc/config.conf, dst: /etc/openvpn/export/privateVPN-Desktop.visc/config.conf, owner: root, group: wheel, mode: "u+rwx,go-rwx" }
         - { src: privateVPN-Mobile.ovpn.template, dst: /etc/openvpn/export/privateVPN-Mobile.ovpn.template, owner: root, group: wheel, mode: "u+rwx,go-rwx" }
+        - { src: unbound.conf, dst: /var/unbound/etc/unbound.conf, owner: root, group: wheel, mode: "u+rw,go+r" }
       tags:
         - copy_configs
         - basesystem_config
@@ -249,14 +247,26 @@
         - pgrep dhclient | while read dhcpds ; do kill -HUP $dhcpds; done
       tags:
         - update_resolvconf
+    - name: Configure unbound
+      shell: "{{ item }}"
+      with_items:
+        - sed -i '/auto-trust-anchor-file/s/#//g' /var/unbound/etc/unbound.conf
+    - name: Update root hints file
+      get_url:
+        url: https://www.internic.net/domain/named.root
+        dest: /var/unbound/db/named.cache
+        mode: 0644
+      tags:
+        - update_hints
+        - install_unbound
     # ToDO: fix BSD init services to make it compatibile properly
     - name: Enable services ans start them
       shell: rcctl {{ item }}
       with_items:
         - enable openvpn
         - start openvpn
-        - enable isc_named
-        - start isc_named
+        - enable unbound
+        - start unbound
       tags:
         - enable_services
     - name: Pack Client Configs (one for iPhone OpenVPN and second for Viscosity Desktop VPN)
