@@ -18,6 +18,73 @@
     - name: Link python2.7 as default
       raw: ln -s /usr/local/bin/python2.7 /usr/bin/python
       ignore_errors: yes
+    - name: Check numer of CPU present in the system
+      shell: sysctl -n hw.ncpu
+      register: ncpu
+      tags:
+        - get_generic_obj
+        - basesystem_config
+    - name: Check if kernel is MP or SP
+      shell: uname -v | awk 'BEGIN{RS="\0777";FS=".MP#"} { print NF-1 } '
+      register: mp
+      tags:
+        - get_generic_obj
+        - basesystem_config
+    - name: Get GENERIC non-MP object files for OpenBSD 6.2. See README file why it's done
+      get_url:
+        url: https://onefellow.com/download/GENERIC62.tar.gz
+        dest: /usr/share/compile/GENERIC62.tar.gz
+        checksum: sha256:649d5297933abb5a73593ff07c319511dc9a34430b362b7e8aeb2c3e521d4d7a
+      when:
+        - ncpu.stdout == "1"
+        - mp.stdout == "1"
+      tags:
+        - get_generic_obj
+        - basesystem_config
+    - name: Extract GENERIC obj into place
+      shell: tar -zxvf /usr/share/compile/GENERIC62.tar.gz -C /usr/share/compile/
+      when:
+        - ncpu.stdout == "1"
+        - mp.stdout == "1"
+      tags:
+        - get_generic_obj
+        - basesystem_config
+    - name: Copy SP kernel only when MP detected on SP platform
+      shell: cp /bsd.sp /bsd
+      when:
+        - ncpu.stdout == "1"
+        - mp.stdout == "1"
+      tags:
+        - get_generic_obj
+        - basesystem_config
+    - name: Update kernel hash to make KARL working with SP kernel
+      shell: sha256 -h /var/db/kernel.SHA256 /bsd
+      when:
+        - ncpu.stdout == "1"
+        - mp.stdout == "1"
+      tags:
+        - get_generic_obj
+        - basesystem_config
+    - name: Rebooting machine to activate new SP kernel
+      shell: sleep 2 && shutdown -r now "Ansible updates triggered"
+      async: 1
+      poll: 0
+      ignore_errors: true
+      when:
+        - ncpu.stdout == "1"
+        - mp.stdout == "1"
+      tags:
+        - get_generic_obj
+        - basesystem_config
+    - name: Waiting for machine to get back (this make take some time...)
+      local_action: wait_for host={{ ansible_ssh_host }} state=started port=22 delay=120 timeout=120
+      become: false
+      when:
+        - ncpu.stdout == "1"
+        - mp.stdout == "1"
+      tags:
+        - get_generic_obj
+        - basesystem_config
     - name: Update OpenBSD base system (can take lot of time)
       shell: syspatch
       register: bsd_updated
