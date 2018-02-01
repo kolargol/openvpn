@@ -14,7 +14,7 @@ This playbook guarantee that your data on transit are safe, server _do not_ stor
 
 I am using Easy-RSA 3 to setup [PKI](https://en.wikipedia.org/wiki/Public_key_infrastructure), it's easy to manage (*see below*). [ECC](https://en.wikipedia.org/wiki/Elliptic_curve_cryptography) keypairs use *prime256v1* curve, and RSA uses 2048 bit keys with SHA256 signatures. 
 
-Mobile connections uses **ECDHE-RSA-AES256-GCM-SHA384** TLS1.2 for control channel and **AES-256-GCM** for data encryption, also **HMAC** is used for packets authentication.
+Mobile connections uses **ECDHE-RSA-AES256-GCM-SHA384** TLS1.2 for control channel and **AES-256-GCM** for data encryption, also **tls-crypt** is used for control channel encryption with pre-shared key. Note that iOS app do not yet support ECDSA.
 
 Desktop connections use **ECDHE-ECDSA-AES256-GCM-SHA384** TLS1.2 for control channel and **AES-256-GCM** for data encryption, in additions openvpn is configured to use **tls-crypt** with symmetric key for packet encryption and authentication.
 
