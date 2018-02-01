@@ -64,7 +64,7 @@ Below simple requirements to run your own VPN server
 ### Requirements
 * have [ansible installed](http://docs.ansible.com/ansible/latest/intro_installation.html) on your computer
 * have running **OpenBSD 6.2** instance in some cloud provider (*here we use [exoscale](https://portal.exoscale.ch/register?r=gLrEOdv5hVgv) as stated above*)
-* allow SSH port 22 for install from your host, and permanently allow ports: **UDP** 80 and 443 for VPN
+* allow SSH port 22 for install from your host, and permanently allow ports: **UDP** 53 and 443 for VPN
 * basic knowledge of using terminal and ssh
 * pretty much that's all
 
@@ -109,7 +109,7 @@ That's all.
 
 ### Client Configuration
 
-Desktop config creates IPv4: 172.17.200.0/24 and IPv6: fdd5:b0c4:f9fb:fa1f::/6 network, access on port 80
+Desktop config creates IPv4: 172.17.200.0/24 and IPv6: fdd5:b0c4:f9fb:fa1f::/6 network, access on port 53
 
 Mobile config creates IPv4: 172.16.200.0/24 and IPv6: fdd5:b0c4:f9fb:fa1e::/6 network, access on port 443
 

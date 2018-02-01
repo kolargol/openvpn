@@ -4,7 +4,7 @@ ca ca.crt
 cert ID_NAME.crt
 key ID_NAME.key
 tls-crypt ta.key
-port 80
+port 53
 proto udp
 auth SHA256
 cipher AES-256-GCM
