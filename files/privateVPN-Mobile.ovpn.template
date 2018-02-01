@@ -4,7 +4,6 @@ ca ca.crt
 cert ID_NAME.crt
 key ID_NAME.key
 tls-crypt ta.key
-comp-lzo
 port 80
 proto udp
 auth SHA256
