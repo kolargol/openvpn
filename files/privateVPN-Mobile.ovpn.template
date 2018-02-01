@@ -3,7 +3,7 @@ remote LISTEN_IP
 ca ca.crt
 cert ID_NAME.crt
 key ID_NAME.key
-tls-auth ta.key 1
+tls-crypt ta.key
 comp-lzo
 port 80
 proto udp
