@@ -7,6 +7,8 @@ Once playbook finish, you have ready to use 2 archives with configs and all what
 ## UDP branch
 **If you do not care about paranoid privacy mode and internet speed is important to you, please check [udp-noscrable](https://github.com/kolargol/openvpn/tree/udp-noscramble) branch. UDP branch uses same security measures as master branch but remove scramblesuit and use much faster UDP mode**
 
+**WARNING: scramblesuit is currently not maintained, please use [udp-noscrable](https://github.com/kolargol/openvpn/tree/udp-noscramble) instead. If you want to backport changes from udp-noscrable branch, please create pull request - should be fair easy.** 
+
 ## Why ?
 Because other solutions are crap. So called "_private_" VPNs that are sold are no private - you let **unknown party** to watch _all_ your traffic, they sell it to Ad companies or do what they want with _your_ data. It's really stupid and people are unaware of this.
 This playbook guarantee that your data on transit are safe, server _do not_ store anything related with traffic or DNS queries, even in unlikely breach to your VPN server attacker won't be able to do anything that could harm your data (_of course once you realize server was pwned_). Read below why using VPN on your mobile and desktop is important.
