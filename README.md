@@ -1,5 +1,5 @@
 # OpenVPN with DNS server 
-#### (*this is **UDP** branch - oriented on high performance, if you are looking for Scramblesuit version checkout  [master](https://github.com/kolargol/openvpn/tree/master)*)
+#### (*this is **UDP** branch - oriented on high performance, if you are looking for Scramblesuit version see  [master](https://github.com/kolargol/openvpn/tree/master). Be warned that master is not developed anymore*)
 
 This [ansible](http://docs.ansible.com/ansible/latest/intro_installation.html) script will allow you to install from scratch your own [OpenVPN](https://openvpn.net/index.php/open-source.html) server with [DNS](https://www.unbound.net) server within minutes. Level of knowledge required: **basic**
 
