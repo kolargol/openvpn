@@ -179,8 +179,7 @@
     - name: Copy config files
       copy: src=files/{{ item.src }} dest={{ item.dst}} owner={{ item.owner }} group={{ item.group }} mode={{ item.mode }} #mode="u+rwx,go-w"
       with_items:
-        - { src: privateVPN-Desktop.conf, dst: /etc/openvpn/privateVPN-Desktop.conf, owner: root, group: wheel, mode: "u+rw,go-rw" }
-        - { src: privateVPN-Mobile.conf, dst: /etc/openvpn/privateVPN-Mobile.conf, owner: root, group: wheel, mode: "u+rw,go-rw" }
+        - { src: privateVPN.conf, dst: /etc/openvpn/privateVPN.conf, owner: root, group: wheel, mode: "u+rw,go-rw" }
         - { src: openvpn.init, dst: /etc/rc.d/openvpn, owner: root, group: wheel, mode: "ugo+x,go-w" }
         - { src: rc.conf.local, dst: /etc/rc.conf.local, owner: root, group: wheel, mode: "u+rw,go+r" }
         - { src: gen_config.sh, dst: /etc/openvpn/export, owner: root, group: wheel, mode: "u+rwx,go-rwx" }
@@ -214,11 +213,9 @@
       shell: "{{ item }}"
       with_items:
         - ifconfig {{ ifname.stdout }} | grep inet | grep -v inet6 | awk '{ print $2}' | xargs -I xxx sed -i 's/[[:<:]]LISTEN_IP[[:>:]]/xxx/g'
-            /etc/openvpn/privateVPN-Mobile.conf
-            /etc/openvpn/privateVPN-Desktop.conf
+            /etc/openvpn/privateVPN.conf
             /etc/pf.conf
-        - hostname | xargs -I xxx sed -i s/SERVER_CERT/PrivateVPN-xxx_ECC/g /etc/openvpn/privateVPN-Desktop.conf
-        - hostname | xargs -I xxx sed -i s/SERVER_CERT/PrivateVPN-xxx_RSA/g /etc/openvpn/privateVPN-Mobile.conf
+        - hostname | xargs -I xxx sed -i s/SERVER_CERT/PrivateVPN-xxx/g /etc/openvpn/privateVPN.conf
       tags:
         - update_templates
         - copy_configs
@@ -237,7 +234,7 @@
     - name: If IPv6 is present add additional rules to pf and place IPv6 address
       shell: "{{ item }}"
       with_items:
-        - echo "pass out on {{ ifname.stdout }} from fdd5:b0c4:f9fb:fa1f::/64 to any nat-to \$ext_ip_6\npass out on {{ ifname.stdout }} from fdd5:b0c4:f9fb:fa1e::/64 to any nat-to \$ext_ip_6" >> /etc/pf.conf
+        - echo "pass out on {{ ifname.stdout }} from fdd5:b0c4:f9fb:fa1f::/64 to any nat-to \$ext_ip_6" >> /etc/pf.conf
         - sed -i s/LISTEN_IPv6/{{ ipv6addr.stdout }}/g /etc/pf.conf
       when: ipv6is.stdout != "0"
       tags:
@@ -246,26 +243,23 @@
       command: pfctl -f /etc/pf.conf
       tags:
         - reload_pf
-    # Since OpenVPN Connect do not support ECDSA yet, we need to split openvpn server into RSA and ECC
-    - name: Easy-RSA - Initialize and Generate PKI/CA/Server Certificate for ECC and RSA
+    - name: Easy-RSA - Initialize and Generate PKI/CA/Server Certificate
       shell: chdir=/etc/openvpn/easy-rsa/ {{ item }}
       with_items:
         - ./easyrsa init-pki
         - ./easyrsa gen-dh
         - apg -a 1 -m 6 -MCL -n1 | xargs -I xxx ./easyrsa --batch --req-cn="privateVPN CA (xxx)" --use-algo=ec --curve={{ crypto_curve }} build-ca nopass
-        - hostname | xargs -I xxx ./easyrsa --use-algo=ec --curve={{ crypto_curve }} build-server-full "PrivateVPN-xxx_ECC" nopass
-        - hostname | xargs -I xxx ./easyrsa --use-algo=rsa --ns-cert=yes  build-server-full "PrivateVPN-xxx_RSA" nopass
+        - hostname | xargs -I xxx ./easyrsa --use-algo=ec --curve={{ crypto_curve }} --ns-cert=yes build-server-full "PrivateVPN-xxx" nopass
       tags:
         - create_pki
-    # It is important to have always name "Mobile" or "Desktop" in Subject field. We CAN use EC keys for mobile however
-    - name: Create one sample set of Client certificates for Mobile and Desktop
+    - name: Create one sample set of Client certificates. John have Desktop while Barbara have iPhone
       shell: chdir=/etc/openvpn/easy-rsa/ {{ item }}
       with_items:
-        - ./easyrsa --use-algo=ec --curve={{ crypto_curve }} build-client-full privateVPN-Mobile-JohnDoe nopass
         - ./easyrsa --use-algo=ec --curve={{ crypto_curve }} build-client-full privateVPN-Desktop-JohnDoe nopass
+        - ./easyrsa --use-algo=ec --curve={{ crypto_curve }} build-client-full privateVPN-Mobile-BarbaraDoe nopass
       tags:
         - gen_client_certs
-    - name: Create shared-secret for TLSauth(RSA) and TLScrypt(ECC)
+    - name: Create shared-secret for tls-crypt
       shell: openvpn --genkey --secret /etc/openvpn/easy-rsa/pki/ta.key
       tags:
         - gen_ta
@@ -283,6 +277,7 @@
       tags:
         - get_ca_sha2
         - update_ca_hash
+    # verify-hash is not yet supported on iOS but we generate it anyway for future use
     - name: Generate SHA1 from CA certificate
       shell: openssl x509 -in /etc/openvpn/easy-rsa/pki/ca.crt -noout -sha1 -fingerprint|cut -d= -f2
       register: ca_sha1
@@ -340,6 +335,6 @@
       shell: chdir=/etc/openvpn/export/ {{ item }}
       with_items:
         - ./gen_config.sh privateVPN-Desktop-JohnDoe
-        - ./gen_config.sh privateVPN-Mobile-JohnDoe
+        - ./gen_config.sh privateVPN-Mobile-Barbara
       tags:
         - gen_package_vpn
