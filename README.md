@@ -12,13 +12,9 @@ This playbook guarantee that your data on transit are safe, server _do not_ stor
 
 ## Security
 
-I am using Easy-RSA 3 to setup [PKI](https://en.wikipedia.org/wiki/Public_key_infrastructure), it's easy to manage (*see below*). [ECC](https://en.wikipedia.org/wiki/Elliptic_curve_cryptography) keypairs use *secp256k1* curve, and RSA uses 2048 bit keys with SHA256 signatures. 
+I am using Easy-RSA 3 to setup [PKI](https://en.wikipedia.org/wiki/Public_key_infrastructure), it's easy to manage (*see below*) and [ECC](https://en.wikipedia.org/wiki/Elliptic_curve_cryptography) keypairs use *secp256k1* curve.
 
-Mobile connections uses **ECDHE-RSA-AES256-GCM-SHA384** TLS1.2 for control channel and **AES-256-GCM** for data encryption, also **tls-crypt** is used for control channel encryption with pre-shared key. Note that iOS app do not yet support ECDSA.
-
-Desktop connections use **ECDHE-ECDSA-AES256-GCM-SHA384** TLS1.2 for control channel and **AES-256-GCM** for data encryption, in additions openvpn is configured to use **tls-crypt** with symmetric key for packet encryption and authentication.
-
-For both control channels 256 bit EC (*curve secp256k1*) is used by default.
+Connections use **ECDHE-ECDSA-AES256-GCM-SHA384** TLS1.2 for control channel and **AES-256-GCM** for data encryption, in additions openvpn is configured to use **tls-crypt** with symmetric key for packet encryption and authentication. Control channels 256 bit EC (*curve secp256k1*) is used by default.
 
 There are other settings that ensure connection is safe, like EKU, CA hash verification and others, see config for details. 
 
@@ -64,7 +60,7 @@ Below simple requirements to run your own VPN server
 ### Requirements
 * have [ansible installed](http://docs.ansible.com/ansible/latest/intro_installation.html) on your computer
 * have running **OpenBSD 6.2** instance in some cloud provider (*here we use [exoscale](https://portal.exoscale.ch/register?r=gLrEOdv5hVgv) as stated above*)
-* allow SSH port 22 for install from your host, and permanently allow ports: **UDP** 53 and 443 for VPN
+* allow SSH port 22 for install from your host (*root account*), and permanently allow port: **53 UDP** for VPN access
 * basic knowledge of using terminal and ssh
 * pretty much that's all
 
@@ -80,7 +76,7 @@ get your configs, they are in
 
 you can use: *scp root@SERVER_IP:/etc/openvpn/export/archives/\* .* to copy config files all at once.
 
-Once all is done, you can import above configs into your Viscosity app or/and iPhone OpenVPN app - no changes required all is already set. 
+Once all is done, you can import above configs into your Viscosity app or/and iPhone OpenVPN app - no changes required - all is already set. 
 
 ### Generating additional certificates for users
 
@@ -91,11 +87,11 @@ If more users are going to use OpenVPN then you need to generate new key-pairs (
 
 on the server, go to: */etc/openvpn/easy-rsa/* and type:
 
-**./easyrsa --use-algo=ec --curve=prime256v1 build-client-full privateVPN-Mobie-USERNAME nopass** - for *Mobile* client, note that part "privateVPN-Mobile-" should be unchanged in certificate name, just add proper USERNAME (*no spaces or crazy stuff here, just a-azA-Z*). *Mobile* is a keyword used later by script.
+**./easyrsa --use-algo=ec --curve=secp256k1 build-client-full privateVPN-Mobie-USERNAME nopass** - for *Mobile* client, note that part "privateVPN-Mobile-" should be unchanged in certificate name, just add proper USERNAME (*no spaces or crazy stuff here, just a-azA-Z*). *Mobile* is a keyword used later by script.
 
-**./easyrsa --use-algo=ec --curve=prime256v1 build-client-full privateVPN-Desktop-USERNAME nopass** - for *Desktop* client, note that part "privateVPN-Desktop-" should be unchanged in certificate name, just add proper USERNAME, same as above - no crazy characters. *Desktop* is a keyword, do not change it.
+**./easyrsa --use-algo=ec --curve=secp256k1 build-client-full privateVPN-Desktop-USERNAME nopass** - for *Desktop* client, note that part "privateVPN-Desktop-" should be unchanged in certificate name, just add proper USERNAME, same as above - no crazy characters. *Desktop* is a keyword, do not change it.
 
-**Note:** as you can see private keys are generated *without* password, you can password-protect them by removing **nopass** option. You will be asked for password and this is **recommended** way of generating keypair. I use nopass just for the convenience of the playbook. Also, for god sake **do not send keypairs via email or any other crazy way** without properly encrypting them, best - set password on key and wrap up by some gpg.
+**Note:** as you can see private keys are generated *without* password, you can password-protect them by removing **nopass** option. You will be asked for password and this is **recommended** way of generating keypair. I use nopass just for the convenience of the playbook. Also, for god sake **do not send keypairs via email or any other crazy way** without properly encrypting them, best - set password on key and wrap up by gpg.
 
 Once you understood all, let's generate packages with config, easy like 1,2,3...: go to: */etc/openvpn/export/* and for each user run: **./gen_config.sh privateVPN-Desktop-USERNAME** packages are put into *archives/* folder. Copy to localhosts, share, install, enjoy.
 
@@ -109,9 +105,7 @@ That's all.
 
 ### Client Configuration
 
-Desktop config creates IPv4: 172.17.200.0/24 and IPv6: fdd5:b0c4:f9fb:fa1f::/6 network, access on port 53
-
-Mobile config creates IPv4: 172.16.200.0/24 and IPv6: fdd5:b0c4:f9fb:fa1e::/6 network, access on port 443
+Config creates IPv4: 172.17.200.0/24 and IPv6: fdd5:b0c4:f9fb:fa1f::/6 network, access on port 53
 
 ### Known issues and workarounds
 
