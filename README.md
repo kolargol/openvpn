@@ -12,13 +12,13 @@ This playbook guarantee that your data on transit are safe, server _do not_ stor
 
 ## Security
 
-I am using Easy-RSA 3 to setup [PKI](https://en.wikipedia.org/wiki/Public_key_infrastructure), it's easy to manage (*see below*). [ECC](https://en.wikipedia.org/wiki/Elliptic_curve_cryptography) keypairs use *prime256v1* curve, and RSA uses 2048 bit keys with SHA256 signatures. 
+I am using Easy-RSA 3 to setup [PKI](https://en.wikipedia.org/wiki/Public_key_infrastructure), it's easy to manage (*see below*). [ECC](https://en.wikipedia.org/wiki/Elliptic_curve_cryptography) keypairs use *secp256k1* curve, and RSA uses 2048 bit keys with SHA256 signatures. 
 
 Mobile connections uses **ECDHE-RSA-AES256-GCM-SHA384** TLS1.2 for control channel and **AES-256-GCM** for data encryption, also **tls-crypt** is used for control channel encryption with pre-shared key. Note that iOS app do not yet support ECDSA.
 
 Desktop connections use **ECDHE-ECDSA-AES256-GCM-SHA384** TLS1.2 for control channel and **AES-256-GCM** for data encryption, in additions openvpn is configured to use **tls-crypt** with symmetric key for packet encryption and authentication.
 
-For both control channels 256 bit EC (*curve prime256v1*) is used by default.
+For both control channels 256 bit EC (*curve secp256k1*) is used by default.
 
 There are other settings that ensure connection is safe, like EKU, CA hash verification and others, see config for details. 
 
@@ -91,7 +91,7 @@ If more users are going to use OpenVPN then you need to generate new key-pairs (
 
 on the server, go to: */etc/openvpn/easy-rsa/* and type:
 
-**./easyrsa --use-algo=ec --curve=prime256v1 build-client-full privateVPN-Mobile-USERNAME nopass** - for *Mobile* client, note that part "privateVPN-Mobile-" should be unchanged in certificate name, just add proper USERNAME (*no spaces or crazy stuff here, just a-azA-Z*). *Mobile* is a keyword used later by script.
+**./easyrsa --use-algo=ec --curve=prime256v1 build-client-full privateVPN-Mobie-USERNAME nopass** - for *Mobile* client, note that part "privateVPN-Mobile-" should be unchanged in certificate name, just add proper USERNAME (*no spaces or crazy stuff here, just a-azA-Z*). *Mobile* is a keyword used later by script.
 
 **./easyrsa --use-algo=ec --curve=prime256v1 build-client-full privateVPN-Desktop-USERNAME nopass** - for *Desktop* client, note that part "privateVPN-Desktop-" should be unchanged in certificate name, just add proper USERNAME, same as above - no crazy characters. *Desktop* is a keyword, do not change it.
 
