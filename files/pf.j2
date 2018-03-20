@@ -1,16 +1,31 @@
+# Set some tables and vars
 ext_ip_4 = "LISTEN_IP"
 ext_ip_6 = "LISTEN_IPv6"
+ssh_admin = "SSH_ADMIN"
+icmp_types = "{ echoreq, unreach }"
 
-set skip on lo
+# Set options
+set block-policy drop
+set skip on { lo, tun0 }
 
-block return    # block stateless traffic
-pass            # establish keep-state
+# General rules
+block in all
+pass out all
 
 # normalise traffic, if you see connection problems comment out this rule and reload pf
-match in all scrub (no-df)
+match in all scrub (no-df random-id reassemble tcp)
 
 # spoofing protection on all interfaces
 block in quick from urpf-failed
+
+# allow PathMTU
+pass inet proto icmp all icmp-type $icmp_types
+
+# Allow OpenVPN on port 53
+pass in on {{ ifname.stdout }} inet proto udp to $ext_ip_4 port 53
+
+# Allow SSH from known hosts
+pass in on {{ ifname.stdout }} proto tcp from $ssh_admin to any port 22
 
 # NAT from OpenVPN net
 pass out on {{ ifname.stdout }} from 172.17.200.0/24 to any nat-to $ext_ip_4
