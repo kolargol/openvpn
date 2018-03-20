@@ -216,6 +216,7 @@
             /etc/openvpn/privateVPN.conf
             /etc/pf.conf
         - hostname | xargs -I xxx sed -i s/SERVER_CERT/PrivateVPN-xxx/g /etc/openvpn/privateVPN.conf
+        - w -h|grep root|awk '{print $3}'|xargs -I xxx sed -i s/SSH_ADMIN/xxx/g /etc/pf.conf
       tags:
         - update_templates
         - copy_configs
