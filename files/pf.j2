@@ -21,6 +21,22 @@ block in quick from urpf-failed
 # allow PathMTU
 pass inet proto icmp all icmp-type $icmp_types
 
+# Some ipv6 madness (see: https://home.nuug.no/~peter/pf/newest/icmp6.html):
+
+## allow icmp6 for getting address using IPv6 autoconfiguration from router
+pass inet6 proto ipv6-icmp all icmp6-type routeradv
+pass inet6 proto ipv6-icmp all icmp6-type routersol
+
+## allow icmp6 for getting neighbor addresses
+pass inet6 proto ipv6-icmp all icmp6-type neighbradv
+pass inet6 proto ipv6-icmp all icmp6-type neighbrsol
+
+## allow icmp6 echo, not required, but sometimes nice
+pass in inet6 proto ipv6-icmp all icmp6-type echoreq
+
+## pass icmp-types: unreachable, time exceeded, parameter problem
+pass in inet6 proto ipv6-icmp all icmp6-type {1 3 4}
+
 # Allow OpenVPN on port 53
 pass in on {{ ifname.stdout }} inet proto udp to $ext_ip_4 port 53
 
