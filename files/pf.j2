@@ -7,6 +7,7 @@ icmp_types = "{ echoreq, unreach }"
 # Set options
 set block-policy drop
 set skip on { lo, tun0 }
+set syncookies always
 
 # General rules
 block in all
