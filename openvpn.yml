@@ -143,7 +143,7 @@
       openbsd_pkg: name={{ item }} state=present
       with_items:
         - easy-rsa
-        - openvpn
+        - openvpn--
         - bash
         - apg
       tags:
