@@ -1,72 +1,96 @@
 #!/bin/bash
 
+# custom build
+#openvpn=/usr/local/openvpn/sbin/openvpn
+
+# openvpn from ports
+openvpn=/usr/local/sbin/openvpn
+
+hup_pf(){
+  sleep 3
+  pfctl -f /etc/pf.conf
+}
+
+ov_version(){
+  ov_version=$($openvpn --version | head -n1 | cut -d" " -f-2)
+  echo $ov_version
+}
+
 start_openvpn(){
-  # SingleStart
-  if [ "$1" != "" ]; then
+  ov_version
+  if [ ! -z "$1" ]; then
+    # SingleStart
     if [ ! -f /etc/openvpn/$1.conf ];then
       echo "Config file: $1.conf do not exist"
       exit 1
     fi
-    echo -n "Starting OpenVPN for: $1 "
-    /usr/local/sbin/openvpn --daemon $1 --cd /etc/openvpn --config $1.conf
-    ret=$?
+    echo -n "Starting config: $1 "
+    $openvpn --daemon $1 --cd /etc/openvpn --config $1.conf
     if [ "$?" != "0" ];then
         echo "...failed"
         exit 1
       else
         echo "...ok"
     fi
-    exit
+  else
+    # MultiStart
+    for config in /etc/openvpn/*.conf; do
+       daemon_name=$(echo $config | cut -d/ -f4 | cut -d\. -f1-)
+       echo -n "Starting config: $daemon_name "
+       $openvpn --daemon $daemon_name --cd /etc/openvpn --config $config
+       if [ "$?" != "0" ];then
+           echo "...failed"
+         else
+           echo "...ok"
+       fi
+    done
   fi
-
-  # MultiStart
-  for config in /etc/openvpn/*.conf; do
-     daemon_name=$(echo $config | cut -d/ -f4 | cut -d\. -f1)
-     echo -n "Starting OpenVPN for: $daemon_name "
-     /usr/local/sbin/openvpn --daemon $daemon_name --cd /etc/openvpn --config $config
-     ret=$?
-     if [ "$?" != "0" ];then
-         echo "...failed"
-       else
-         echo "...ok"
-     fi
-     
-  done
+  hup_pf
 }
 
 stop_openvpn(){
-  if [ "$1" != "" ];then
-    pido=$(pgrep -fo "$1")
-    echo "Stopping OpenVPN: $1 (PID: $pido)"
-    kill -9 $pido
-    exit
+  if [ ! -z "$1" ];then
+      pido=$(pgrep -fo "$1")
+      echo "Stopping config: $1 (PID: $pido)"
+      kill -9 $pido
+    else
+      echo "Stopping all processes:"
+      pgrep openvpn | while read pid; do
+        echo "PID: $pid"
+        kill -9 $pid
+      done
   fi
-  echo "Stopping OpenVPN"
-  pgrep openvpn | while read pid; do
-    echo "PID: $pid"
-    kill -9 $pid
-  done
 }
 
 restart_openvpn(){
-  echo "Restarting OpenVPN"
+  echo "restarting:"
   stop_openvpn $1
   start_openvpn $1
 }
 
 status_openvpn(){
-  echo "Not implemented"
+  status=$(pgrep -q openvpn;echo $?)
+  case "$status" in
+    0) echo "OpenVPN is running"; exit $status
+    ;;
+    1) echo "OpenVPN is NOT running"; exit $status
+    ;;
+    *) echo "Unknown status code: $status"; exit 1
+  esac
 }
-
 
 case "$1" in
   start) start_openvpn $2
   ;;
   stop) stop_openvpn $2
   ;;
-  restart) restart_openvpn
+  restart) restart_openvpn $2
+  ;;
+  version) ov_version
+  ;;
+  status) status_openvpn
   ;;
   *)
-  echo "$0 [start|stop|restart]"
+  echo "$0 [start|stop|restart|version]"
   exit
 esac
